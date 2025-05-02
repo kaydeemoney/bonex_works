@@ -1,0 +1,1 @@
+pip install flask flask_sqlalchemy flask_migrate flask_jwt_extended flask_cors python-dotenv flask-restful flask-admin

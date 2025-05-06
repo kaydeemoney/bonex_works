@@ -1,0 +1,658 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+body {
+  background-color: #f5f7fa;
+}
+.container {
+  display: flex;
+  flex-wrap: wrap;
+}
+.sidebar {
+  width: 240px;
+  color: #fff;
+  min-height: 100vh;
+  background-color: #1D3786;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 1000;
+  transition: left 0.3s ease;
+}
+.menu-toggle {
+  display: none;
+  position: fixed;    /* Keep it fixed at the top */
+  top: 30px;          /* Increase distance from top */
+  left: 20px;         /* Set distance from the left */
+  z-index: 1100;      /* Ensure it stays above content */
+  background: #1D3786;
+  color: white;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.main-content {
+  flex: 1;
+  padding: 1.5rem;
+  margin-left: 240px;
+  transition: margin-left 0.3s ease;
+}
+@media (max-width: 768px) {
+  /* Adjust the dashboard title to create space for the toggle button */
+  .header {
+    padding: 1rem;
+    flex-direction: row;   /* Ensure the layout remains horizontal on mobile */
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header h1 {
+    font-size: 18px;
+    margin-left: 25px;  /* Push the title to the right */
+  }
+
+  .menu-toggle {
+    display: block;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1100;
+    background: #1D3786;
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+}
+
+
+.nav-links a {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  text-decoration: none;
+  color: #b0bed1;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+.nav-links a.active,
+.nav-links a:hover {
+  background: #2044ac;
+  color: #fff;
+}
+.nav-links i.icon {
+  margin-right: 10px;
+}
+.top-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+.top-bar .user {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.profile-pic,
+.profile-pic-lg {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+.profile-pic-lg {
+  width: 50px;
+  height: 50px;
+}
+.user-summary .summary-card {
+  background: linear-gradient(to right, #1e41a5, #2646e3);
+  color: white;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  border-radius: 10px;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.balance-info h4 {
+  font-size: 1rem;
+  margin-bottom: 5px;
+}
+.balance-info p {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+.buttons {
+  margin-top: 0.7rem;
+}
+.deposit,
+.withdraw {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.deposit {
+  background-color: #11e66a;
+  color: white;
+  margin-right: 10px;
+}
+.withdraw {
+  background-color: #1a1a6e;
+  color: white;
+}
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  padding: 20px 25px;
+  transition: 0.3s;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #3d4a5c;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+.icon-box {
+  background-color: #e9f0ff;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 16px;
+  color: #4267ee;
+}
+.icon {
+  padding: 8px 10px;
+  margin-right: 10px;
+}
+.card-amount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 8px;
+}
+.card-change {
+  font-size: 13px;
+  font-weight: 500;
+}
+.card-change.positive {
+  color: #00b86b;
+}
+.card-change span {
+  color: #8b8b8b;
+  font-weight: 400;
+  margin-left: 4px;
+}
+.investment-title {
+  font-size: 18px;
+  font-weight: 900;
+  margin: 2% 0 2% 1%;
+  color: #000;
+}
+.investment-section h2 {
+  font-size: 21px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+.investment-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.plan-title {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 19px;
+}
+.plan-icon {
+  background-color: #e9f0ff;
+  color: #4267ee;
+  padding: 6px 9px;
+  border-radius: 8px;
+  margin-right: 10px;
+  font-size: 17px;
+}
+.status-badge {
+  background-color: #e1fbee;
+  color: #1bbf81;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+.card-info {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 20px 0;
+}
+.info-group {
+  width: 48%;
+  margin-bottom: 10px;
+}
+.info-group label {
+  font-size: 15px;
+  color: #6b7280;
+  margin-bottom: 2px;
+  display: block;
+}
+.info-value {
+  font-size: 17px;
+  font-weight: 700;
+  color: #000;
+}
+.info-value.profit {
+  color: #1bbf81;
+}
+.progress-section {
+  margin-bottom: 20px;
+  position: relative;
+}
+.progress-bar {
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.progress-fill {
+  background-color: #4267ee;
+  height: 100%;
+  border-radius: 5px;
+}
+.progress-percent {
+  font-size: 12px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: #6b7280;
+}
+.details-btn {
+  align-self: flex-end;
+  padding: 8px 16px;
+  border: 2px solid #1f2b6c;
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: 600;
+  background: transparent;
+  color: #1f2b6c;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.details-btn:hover {
+  background-color: #f0f4ff;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e9eaf0;
+}
+.header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+}
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+  .user-info,
+  .profile-card .actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+  }
+  .profile-card .balance-info {
+    margin-top: 1rem;
+    width: 100%;
+  }
+}
+
+/* --- NEW/UPDATED: General improvements for small screens --- */
+@media (max-width: 768px) {
+  body {
+    padding: 0;
+  }
+
+  .main-content {
+    padding: 1rem;
+    margin-left: 0; /* Make sure it resets */
+  }
+
+  .user-summary .summary-card {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .deposit,
+  .withdraw {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  .dashboard-cards {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .card {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .investment-card {
+    width: 100%;
+  }
+
+  .info-group {
+    width: 100%;
+  }
+
+  .details-btn {
+    width: 100%;
+    font-size: 16px;
+    padding: 10px;
+  }
+
+  .header {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header h1 {
+    font-size: 18px;
+  }
+
+  .sidebar {
+    width: 100%;
+    left: -100%;
+    z-index: 1000;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+.username {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+  margin-right: 10px;
+}
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+.nav-menu {
+  list-style: none;
+  padding: 20px 20px 0 20px;
+  margin: 0;
+  flex-grow: 1;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 8px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+.nav-item i {
+  margin-right: 10px;
+  font-size: 14px;
+}
+.nav-item:hover {
+  background-color: #2644a0;
+}
+.nav-item.active {
+  background-color: #2a49b9;
+}
+.logout {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #f8f9fa;
+  transition: color 0.3s ease;
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.logout:hover {
+  color: #ff6666;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+.icon-yellow {
+  color: #facc15;
+  font-size: 20px;
+  margin-right: 10px;
+}
+.logo-text {
+  font-weight: bold;
+  font-size: 18px;
+}
+.sidebar-header {
+  background-color: #162b68;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+}
+
+
+
+
+
+
+
+
+
+.plans {
+  display: flex;
+  margin-top: 30px;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.plans-header {
+  background-color: #f3f4f6;
+  padding: 40px 20px 20px 20px;
+  text-align: center;
+}
+
+.plans-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #111827;
+}
+
+.plans-header p {
+  font-size: 14px;
+  color: #4b5563;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.cardi {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  width: 325px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cardi h2 {
+  font-size: 1.25rem;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.icon-boxi {
+  align-self: flex-end;
+}
+
+.icon-boxi i {
+  color: #facc15;
+  font-size: 24px;
+}
+
+.roi {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.roi span:first-child {
+  display: block;
+  font-size: 14px;
+  color: #888;
+}
+
+.roi .value {
+  font-size: 32px;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.roi .annual {
+  font-size: 12px;
+  color: #888;
+}
+
+.detailsi {
+  justify-content: center;
+  font-size: 14px;
+  margin-bottom: 10px;
+  align-content: center;
+}
+
+.detailsi strong {
+  font-weight: 600;
+}
+
+.description {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.btn {
+  background-color: #1d4ed8;
+  color: #fff;
+  padding: 12px;
+  text-align: center;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+  .plans-header {
+    padding: 30px 15px 15px 15px;
+  }
+
+  .plans-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .plans-header p {
+    font-size: 13px;
+    padding: 0 10px;
+  }
+
+  .plans {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 0 10px;
+  }
+
+  .cardi {
+    width: 100%;
+    max-width: 95%;
+  }
+
+  .cardi h2 {
+    font-size: 1.1rem;
+  }
+
+  .roi .value {
+    font-size: 28px;
+  }
+
+  .btn {
+    font-size: 14px;
+    padding: 10px;
+  }
+}

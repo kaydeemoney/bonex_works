@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Profit Vault Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <div class="menu-toggle" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+  </div>
+  
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-house icon-yellow"></i>
+        <span class="logo-text">Profit Vault</span>
+      </div>
+      <ul class="nav-menu">
+        <li class="nav-item active">
+          <i class="fa-solid fa-table-cells"></i>
+          <span>Dashboard</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-list-check"></i>
+          <span>Investment Plans</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-dollar-sign"></i>
+          <span>Deposit</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-right-left"></i>
+          <span>Withdraw</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-user-group"></i>
+          <span>Referral Program</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Transaction History</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-user"></i>
+          <span>My Profile</span>
+        </li>
+      </ul>
+      <div class="logout">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>Logout</span>
+      </div>
+    </div>
+
+    <main class="main-content">
+
+
+
+      <div class="header">
+        <h1>Investments</h1>
+        <div class="user-info">
+          <span class="username">John Doe</span>
+          <img src="https://i.pravatar.cc/32" alt="User Avatar" class="avatar" />
+        </div>
+      </div>
+
+      <section class="plans-header">
+        <h1>Investment Plans</h1>
+        <p>
+          Choose from our range of investment plans designed to maximize your returns.
+          Our plans offer competitive ROI rates and flexible investment periods.
+        </p>
+      </section>
+      
+
+
+
+
+
+      <div class="plans">
+        <div class="cardi">
+          <h2>Starter Plan</h2>
+          <div class="icon-boxi">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div class="roi">
+            <span>Monthly ROI</span>
+            <div class="value">20%</div>
+            <div class="annual">Annual ROI <strong>240%</strong> &bull; Period <strong>30 days</strong></div>
+          </div>
+          <div class="detailsi"><strong>Minimum Investment</strong> $50.00</div>
+          <div class="detailsi"><strong>Maximum Investment</strong> $99.99</div>
+          <div class="description">Perfect for beginners looking to start their investment journey.</div>
+          <button class="btn">Invest Now</button>
+        </div>
+    
+        <div class="cardi">
+          <h2>Novie Plan</h2>
+          <div class="icon-boxi">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div class="roi">
+            <span>Monthly ROI</span>
+            <div class="value">100%</div>
+            <div class="annual">Annual ROI <strong>1200%</strong> &bull; Period <strong>30 days</strong></div>
+          </div>
+          <div class="detailsi"><strong>Minimum Investment</strong> $100.00</div>
+          <div class="detailsi"><strong>Maximum Investment</strong> $499.99</div>
+          <div class="description">Ideal for those seeking higher returns with minimal investment.</div>
+          <button class="btn">Invest Now</button>
+        </div>
+    
+        <div class="cardi">
+          <h2>Pro Plan</h2>
+          <div class="icon-boxi">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div class="roi">
+            <span>Monthly ROI</span>
+            <div class="value">110%</div>
+            <div class="annual">Annual ROI <strong>1320%</strong> &bull; Period <strong>30 days</strong></div>
+          </div>
+          <div class="detailsi"><strong>Minimum Investment</strong> $500.00</div>
+          <div class="detailsi"><strong>Maximum Investment</strong> $999.99</div>
+          <div class="description">For serious investors looking to maximize their profits.</div>
+          <button class="btn">Invest Now</button>
+        </div>
+      </div>
+
+
+
+
+      <div class="plans">
+        <div class="cardi">
+          <h2>Starter Plan</h2>
+          <div class="icon-boxi">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div class="roi">
+            <span>Monthly ROI</span>
+            <div class="value">20%</div>
+            <div class="annual">Annual ROI <strong>240%</strong> &bull; Period <strong>30 days</strong></div>
+          </div>
+          <div class="detailsi"><strong>Minimum Investment</strong> $50.00</div>
+          <div class="detailsi"><strong>Maximum Investment</strong> $99.99</div>
+          <div class="description">Perfect for beginners looking to start their investment journey.</div>
+          <button class="btn">Invest Now</button>
+        </div>
+    
+        <div class="cardi">
+          <h2>Novie Plan</h2>
+          <div class="icon-boxi">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div class="roi">
+            <span>Monthly ROI</span>
+            <div class="value">100%</div>
+            <div class="annual">Annual ROI <strong>1200%</strong> &bull; Period <strong>30 days</strong></div>
+          </div>
+          <div class="detailsi"><strong>Minimum Investment</strong> $100.00</div>
+          <div class="detailsi"><strong>Maximum Investment</strong> $499.99</div>
+          <div class="description">Ideal for those seeking higher returns with minimal investment.</div>
+          <button class="btn">Invest Now</button>
+        </div>
+    
+        <div class="cardi">
+          <h2>Pro Plan</h2>
+          <div class="icon-boxi">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div class="roi">
+            <span>Monthly ROI</span>
+            <div class="value">110%</div>
+            <div class="annual">Annual ROI <strong>1320%</strong> &bull; Period <strong>30 days</strong></div>
+          </div>
+          <div class="detailsi"><strong>Minimum Investment</strong> $500.00</div>
+          <div class="detailsi"><strong>Maximum Investment</strong> $999.99</div>
+          <div class="description">For serious investors looking to maximize their profits.</div>
+          <button class="btn">Invest Now</button>
+        </div>
+      </div>
+
+
+
+
+      <div class="plans">
+        <div class="cardi">
+          <h2>Starter Plan</h2>
+          <div class="icon-boxi">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div class="roi">
+            <span>Monthly ROI</span>
+            <div class="value">20%</div>
+            <div class="annual">Annual ROI <strong>240%</strong> &bull; Period <strong>30 days</strong></div>
+          </div>
+          <div class="detailsi"><strong>Minimum Investment</strong> $50.00</div>
+          <div class="detailsi"><strong>Maximum Investment</strong> $99.99</div>
+          <div class="description">Perfect for beginners looking to start their investment journey.</div>
+          <button class="btn">Invest Now</button>
+        </div>
+    
+        <div class="cardi">
+          <h2>Novie Plan</h2>
+          <div class="icon-boxi">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div class="roi">
+            <span>Monthly ROI</span>
+            <div class="value">100%</div>
+            <div class="annual">Annual ROI <strong>1200%</strong> &bull; Period <strong>30 days</strong></div>
+          </div>
+          <div class="detailsi"><strong>Minimum Investment</strong> $100.00</div>
+          <div class="detailsi"><strong>Maximum Investment</strong> $499.99</div>
+          <div class="description">Ideal for those seeking higher returns with minimal investment.</div>
+          <button class="btn">Invest Now</button>
+        </div>
+    
+       
+      </div>
+
+
+
+
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>

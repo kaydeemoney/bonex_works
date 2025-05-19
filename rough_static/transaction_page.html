@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Profit Vault Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <div class="menu-toggle" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+  </div>
+  
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-house icon-yellow"></i>
+        <span class="logo-text">Profit Vault</span>
+      </div>
+      <ul class="nav-menu">
+        <li class="nav-item active">
+          <i class="fa-solid fa-table-cells"></i>
+          <span>Dashboard</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-list-check"></i>
+          <span>Investment Plans</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-dollar-sign"></i>
+          <span>Deposit</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-right-left"></i>
+          <span>Withdraw</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-user-group"></i>
+          <span>Referral Program</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Transaction History</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-user"></i>
+          <span>My Profile</span>
+        </li>
+      </ul>
+      <div class="logout">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>Logout</span>
+      </div>
+    </div>
+
+    <main class="main-content">
+
+<section class="transaction-history">
+  <h2>Transaction History</h2>
+
+  <div class="filters">
+    <h3>Filters</h3>
+    <div class="filter-controls">
+      <div>
+        <label for="transactionType">Transaction Type</label>
+        <select id="transactionType">
+          <option selected>Select an option</option>
+        </select>
+      </div>
+      <div>
+        <label for="dateRange">Date Range</label>
+        <select id="dateRange">
+          <option selected>Select an option</option>
+        </select>
+      </div>
+      <button class="reset-btn">Reset Filters</button>
+      <button class="export-btn"><i class="fa-solid fa-download"></i> Export</button>
+    </div>
+  </div>
+
+  <div class="transactions-section">
+    <div class="transactions-header">
+      <h3>Transactions</h3>
+      <input type="text" placeholder="Search transactions..." class="search-input" />
+    </div>
+
+    <div class="transaction-table">
+      <div class="table-header">
+        <span>Type</span>
+        <span>Amount</span>
+        <span>Status</span>
+        <span>Date</span>
+        <span>Description</span>
+      </div>
+
+      <!-- Example Rows -->
+      <div class="table-row">
+        <span><i class="fa-solid fa-user-group text-orange-500"></i> Referral</span>
+        <span class="positive">+$50.00</span>
+        <span class="status completed">Completed</span>
+        <span>May 16, 2025, 10:23 AM</span>
+        <span>Referral bonus from Jane Smith</span>
+      </div>
+      <div class="table-row">
+        <span><i class="fa-solid fa-arrow-up text-red-500"></i> Withdrawal</span>
+        <span class="negative">-$150.00</span>
+        <span class="status completed">Completed</span>
+        <span>May 14, 2025, 10:23 AM</span>
+        <span>Withdrawal to external wallet</span>
+      </div>
+      <div class="table-row">
+        <span><i class="fa-solid fa-line-chart text-blue-500"></i> Investment</span>
+        <span>$750.00</span>
+        <span class="status completed">Completed</span>
+        <span>May 9, 2025, 10:23 AM</span>
+        <span>Pro Plan investment</span>
+      </div>
+      <div class="table-row">
+        <span><i class="fa-solid fa-circle-down text-green-500"></i> Deposit</span>
+        <span class="positive">+$1000.00</span>
+        <span class="status completed">Completed</span>
+        <span>Apr 24, 2025, 10:23 AM</span>
+        <span>Initial deposit</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+</main>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

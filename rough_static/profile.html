@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Profit Vault Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <div class="menu-toggle" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+  </div>
+  
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-house icon-yellow"></i>
+        <span class="logo-text">Profit Vault</span>
+      </div>
+      <ul class="nav-menu">
+        <li class="nav-item active">
+          <i class="fa-solid fa-table-cells"></i>
+          <span>Dashboard</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-list-check"></i>
+          <span>Investment Plans</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-dollar-sign"></i>
+          <span>Deposit</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-right-left"></i>
+          <span>Withdraw</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-user-group"></i>
+          <span>Referral Program</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Transaction History</span>
+        </li>
+        <li class="nav-item">
+          <i class="fa-solid fa-user"></i>
+          <span>My Profile</span>
+        </li>
+      </ul>
+      <div class="logout">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>Logout</span>
+      </div>
+    </div>
+
+    <main class="main-content">
+
+
+
+      <div class="profile-container">
+        <div class="left-panel">
+          <div class="card">
+            <div class="card-header">
+              <h2>Personal Information</h2>
+              <button class="edit-btn"><i class="fa-solid fa-pen"></i> Edit</button>
+            </div>
+            <form class="info-grid">
+              <div class="form-group">
+                <label>First Name</label>
+                <input type="text" value="John" />
+              </div>
+              <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" value="Doe" />
+              </div>
+              <div class="form-group">
+                <label>Mobile Number</label>
+                <input type="text" value="+1234567890" />
+              </div>
+              <div class="form-group">
+                <label>Gender</label>
+                <select>
+                  <option selected>Male</option>
+                  <option>Female</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Country</label>
+                <select>
+                  <option>Select an option</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>State</label>
+                <select>
+                  <option>Select an option</option>
+                </select>
+              </div>
+              <div class="form-group full-width">
+                <label>Email Address</label>
+                <input type="email" value="john@example.com" />
+              </div>
+            </form>
+          </div>
+        </div>
+      
+        <div class="right-panel">
+          <div class="card center-text">
+            <img src="https://i.pravatar.cc/32" alt="User Avatar" class="avatar" />
+            <h3>John Doe</h3>
+            <p>john@example.com</p>
+            <button class="outline-btn"><i class="fa-solid fa-upload"></i> Upload Photo</button>
+          </div>
+          <div class="card">
+            <h3>Account Security</h3>
+            <button class="outline-btn"><i class="fa-solid fa-key"></i> Change Password</button>
+            <button class="outline-btn"><i class="fa-solid fa-lock"></i> Change Transaction PIN</button>
+          </div>
+        </div>
+      </div>
+      
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>

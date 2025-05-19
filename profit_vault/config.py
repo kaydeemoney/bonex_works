@@ -1,7 +1,7 @@
+# config.py
 import os
-
+#using secret key to protect my input
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY", "default_secret")
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "mysql://user:pass@localhost/profit_vault")
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://kaydee:#Kayode1@localhost/profit_vault'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "jwt_secret")
+    SECRET_KEY = '7caa483b-e1c7-4a65-b901-beae2633e028'

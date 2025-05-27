@@ -1,6 +1,6 @@
 -- Create database
-CREATE DATABASE IF NOT EXISTS profit_vault;
-USE profit_vault;
+CREATE DATABASE IF NOT EXISTS new_profit_vault;
+USE new_profit_vault;
 
 -- Users Table
 CREATE TABLE user (
@@ -107,3 +107,16 @@ CREATE TABLE transaction (
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE USER 'bonex1'@'localhost' IDENTIFIED BY 'bonexproject';
+
+GRANT ALL PRIVILEGES ON new_profit_vault TO 'bonex1'@'localhost';
+
+GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE ON `new_profit_vault`.* TO 'bonex1'@'localhost';
+GRANT ALL PRIVILEGES ON `new_profit_vault`.* TO 'bonex1'@'localhost';
+FLUSH PRIVILEGES;
+
+
+FLUSH PRIVILEGES;
+
+
+SHOW GRANTS FOR 'bonex1'@'localhost';

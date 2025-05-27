@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profit Vault</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <header class="landing-header">
+    <div class="logo">🏠 Profit Vault</div>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#about">About</a>
+      <a href="{{ url_for('login') }}" class="btn-secondary">Login</a>
+      <a href="{{ url_for('signup') }}" class="btn-primary">Get Started</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Smart Investing Starts Here</h1>
+    <p>Track earnings, manage referrals, and grow your balance—all in one secure vault.</p>
+    <a href="{{ url_for('login') }}" class="btn-primary">Create Your Account</a>
+  </section>
+
+  <section id="features" class="features">
+    <div class="feature-box">
+      <h3>Referral Program</h3>
+      <p>Earn 5% of your referrals' withdrawal amount.</p>
+    </div>
+    <div class="feature-box">
+      <h3>Investment Plans</h3>
+      <p>Choose flexible investment plans tailored to your goals.</p>
+    </div>
+    <div class="feature-box">
+      <h3>Secure Wallet</h3>
+      <p>Withdraw and deposit safely anytime with full transparency.</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>&copy; 2025 Profit Vault. All rights reserved.</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profit Vault</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+  </head>
+  <body class="auth-bg">
+
+  <div class="auth-card">
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message {{ category }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Form errors -->
+    {% if form.errors %}
+      <div class="form-errors">
+        <ul>
+          {% for field, errors in form.errors.items() %}
+            {% for error in errors %}
+              <li><strong>{{ field|capitalize }}:</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <form class="auth-form" method="POST" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}  <!-- CSRF token -->
+      <p class="auth-subtitle" style="font-size: larger; font-weight: bolder;">Account Creation Page</p>
+
+      <input type="text" name="first_name" placeholder="First Name" required />
+      <input type="text" name="last_name" placeholder="Last Name" required />
+      <input type="email" name="email" placeholder="Email Address" required />
+      <input type="text" name="mobile" placeholder="Mobile Number" required />
+    
+      <label for="gender">Gender</label>
+      <select id="gender" name="gender" required>
+        <option disabled selected>Select an option</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Prefer Not To Say</option>
+      </select>
+    
+      <input type="text" name="country" placeholder="Country" required />
+      <input type="text" name="state" placeholder="State" required />
+      <input type="password" name="password" placeholder="Password" required />
+      <input type="password" name="confirm_password" placeholder="Re-enter your password" required />
+      <input type="text" name="username" placeholder="Preferred Username" required />
+      <input type="text" name="referral_code" placeholder="Referral Code (optional)" />
+      <input type="text" name="referred_by" placeholder="Referred by (optional)" />
+
+      <input type="text" name="transaction_pin" placeholder="Transaction Pin" required />
+      <input type="text" name="reenter_transaction_pin" placeholder="Re-enter Transaction Pin" required />
+
+      <div>
+        <h1>Upload Profile Picture</h1>
+        <input type="file" name="file" required>
+      </div>
+
+      <button type="submit" class="btn-primary">Register</button>
+      <p class="auth-link">Already have an account? <a href="login.html">Login</a></p>
+    </form>
+
+  </div>
+
+  <script src="{{ url_for('static', filename='js/password_check.js') }}"></script>
+  </body>
+</html>

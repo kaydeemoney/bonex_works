@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profit Vault</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+  </head>
+<body class="auth-bg2">
+  <div class="auth-card">
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message {{ category }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Form errors -->
+    {% if form.errors %}
+      <div class="form-errors">
+        <ul>
+          {% for field, errors in form.errors.items() %}
+            {% for error in errors %}
+              <li><strong>{{ field|capitalize }}:</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    <h2 class="auth-subtitle">Welcome Back</h2>
+    <p class="auth-subtitle">Login to your account</p>
+   
+    <form class="auth-form" method="POST" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}  <!-- CSRF token -->
+      
+      {{ form.email(class="auth-input", placeholder="Email Address") }}
+      {{ form.password(class="auth-input", placeholder="Password") }}
+    
+      <button type="submit" class="btn-primary">Login</button>
+      <p class="auth-link">Don't have an account? <a href="register.html">Register</a></p>
+    </form>
+    
+  </div>
+</body>
+</html>

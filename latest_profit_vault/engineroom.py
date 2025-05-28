@@ -2,8 +2,8 @@ from flask import Flask, Blueprint, render_template, request, redirect, url_for,
 from flask_wtf import FlaskForm
 from PIL import Image
 from flask_sqlalchemy import SQLAlchemy
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, DateField, TextAreaField, RadioField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, DateField, TextAreaField, RadioField, FloatField, IntegerField
+from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional, NumberRange
 import uuid, json
 from config import Config
 from datetime import datetime, timedelta
@@ -13,6 +13,10 @@ from sqlalchemy.exc import IntegrityError
 import os
 from werkzeug.utils import secure_filename
 from PIL import Image, ImageDraw
+from decimal import Decimal
+import string
+import secrets
+
 
 
 app = Flask(__name__, static_folder='static')
@@ -68,6 +72,7 @@ class Investment_Plans(db.Model):
     period_in_days = db.Column(db.Integer, nullable=False)
     monthly_roi = db.Column(db.Float, nullable=False)
     annual_roi = db.Column(db.Float, nullable=False)
+    comment = db.Column(db.String(200), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
 
@@ -132,6 +137,26 @@ class wallet_settings(db.Model):
     amount = db.Column(db.Float, nullable=False)
     destination_wallet=db.Column(db.String(50), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+class CryptoWallet(db.Model):
+    __tablename__ = 'crypto_wallet'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.String(100), unique=True, nullable=True)
+    total_balance_usd = db.Column(db.Numeric(20, 8), default=0.00000000)
+    total_earnings_usd = db.Column(db.Numeric(20, 8), default=0.00000000)
+    total_invested_usd = db.Column(db.Numeric(20, 8), default=0.00000000)
+    referral_code = db.Column(db.String(20), unique=True, nullable=True)
+    referred_by = db.Column(db.String(20), nullable=True)
+    referral_earnings_usd = db.Column(db.Numeric(20, 8), default=0.00000000)
+    active_investments_count = db.Column(db.Integer, default=0)
+    last_investment_date = db.Column(db.DateTime, nullable=True)
+    roi_percentage = db.Column(db.Numeric(5, 2), default=0.00)
+    withdrawable_balance = db.Column(db.Numeric(20, 8), default=0.00000000)
+    last_login_date = db.Column(db.DateTime, nullable=True)
+    account_status = db.Column(db.String(20), default='Active')
+    date_joined = db.Column(db.DateTime, default=datetime.utcnow)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 
 
 class SignupForm(FlaskForm):
@@ -162,10 +187,143 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
+
+class InvestmentPlanForm(FlaskForm):
+    name = StringField("Plan Name", validators=[DataRequired()])
+    
+    min_amount = FloatField("Minimum Amount ($)", validators=[
+        DataRequired(), NumberRange(min=0)
+    ])
+    max_amount = FloatField("Maximum Amount ($)", validators=[
+        DataRequired(), NumberRange(min=0)
+    ])
+    
+    period_in_days = IntegerField("Period (Days)", validators=[
+        DataRequired(), NumberRange(min=1)
+    ])
+    monthly_roi = FloatField("Monthly ROI (%)", validators=[
+        DataRequired(), NumberRange(min=0)
+    ])
+    annual_roi = FloatField("Annual ROI (%)", validators=[
+        DataRequired(), NumberRange(min=0)
+    ])
+    
+    comment = TextAreaField("Comment", validators=[Optional()])
+    
+    submit = SubmitField("Save Plan")
 #these are the routes for pages pertaining to the landing page    
 @app.route("/")
 def index():
     return render_template('index.html')
+
+@app.route("/admin_dashboard")
+def admin_dashboard():
+    return render_template('admin_dashboard.html')
+    
+
+
+@app.route("/admin_investment_plan", methods=['GET', 'POST'])
+def admin_investment_plan():
+    form = InvestmentPlanForm()
+    if form.validate_on_submit():
+        print("form is validated")
+        name = form.name.data
+        min_amount=form.min_amount.data
+        max_amount=form.max_amount.data
+        period_in_days=form.period_in_days.data
+        monthly_roi=form.monthly_roi.data
+        annual_roi=form.annual_roi.data
+        comment=form.comment.data
+
+        investment=Investment_Plans(name=name, min_amount=min_amount,max_amount=max_amount, period_in_days=period_in_days,monthly_roi=monthly_roi,
+                                    annual_roi=annual_roi, comment=comment)
+        try:
+            db.session.add(investment)
+            db.session.commit()
+            flash(f"Investment plan added!", 'success')
+            return redirect(url_for('admin_investment_plan', form=form))
+        except IntegrityError as e:
+            db.session.rollback()
+            flash("Investment plan added successfully!", "success")
+    return render_template("admin_investment_plan.html", form=form)
+
+
+
+
+
+@app.route("/user_dashboard_decider")
+def user_dashboard_decider():
+    email = request.args.get('email')
+    user_table_details=User.query.filter_by(email=email).first()
+    first_name=user_table_details.first_name
+    last_name=user_table_details.last_name
+    email=user_table_details.email
+    pic_id=user_table_details.profile_picture_id
+    user_id=pic_id
+    is_admin=user_table_details.is_admin
+    referred_by=user_table_details.referred_by
+    referral_code = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+
+
+    uploads_folder = os.path.join(app.static_folder, 'uploads')
+    print(pic_id)
+    for file_name in os.listdir(uploads_folder):
+        if file_name.startswith(pic_id):
+            print("e dey")
+            profile_picture = file_name
+            break
+        else:
+            profile_picture = "noname.png"
+    if not pic_id:
+        profile_picture = "noname.png"  
+    print(profile_picture)
+
+    if is_admin!=None:
+        return render_template("admin_dashboard.html")
+
+    user_type= CryptoWallet.query.filter_by(user_id=user_id).first()
+    if user_type:
+        
+        user_account_status="active_member"
+        user_withdrawable_balance=user_type.withdrawable_balance
+        user_roi_percentage=user_type.roi_percentage
+        user_last_investment_date=user_type.last_investment_date
+        user_active_investment_count=user_type.active_investment_count
+        user_referral_earnings_usd=user_type.referral_earnings
+        user_referred_by=user_type.referred_by
+        user_referral_code=user_type.referral_code
+        user_total_invested_usd=user_type.total_invested_usd
+        user_total_earnings_usd=user_type.total_earnings_usd
+        user_total_balance_usd=user_type.total_balance_usd
+
+        active_investment=User_Investments.query.filter_by(user_id=user_id).all()
+
+        return render_template("user_dashboard.html", first_name=first_name, last_name=last_name,
+                               email=email, profile_picture=profile_picture,user_id=user_id, account_status=user_account_status,
+                               last_login_date=datetime.now(),
+                                withdrawable_balance=user_withdrawable_balance, roi_percentage=user_roi_percentage,
+                                last_investment_date=user_last_investment_date, active_investments_count=
+                                user_active_investment_count, referral_earnings_usd=user_referral_earnings_usd,
+                                referred_by=user_referred_by,referral_code=user_referral_code,
+                                total_invested_usd=user_total_invested_usd, total_earnings_usd=user_total_earnings_usd,
+                                total_balance_usd=user_total_balance_usd, active_investment=active_investment )
+        
+#a wholelot of things to still be done here
+
+
+
+
+
+
+    else:
+        return render_template("user_dashboard.html", first_name=first_name, last_name=last_name,email=email, 
+                               profile_picture=profile_picture, user_id=user_id, account_status="new_active",last_login_date=datetime.now(),
+                                withdrawable_balance=0.00000000, roi_percentage=0.00, last_investment_date=None,
+                                active_investments_count=0, referral_earnings_usd=0.00, referred_by=referred_by,
+                                referral_code=referral_code, total_invested_usd=0.00000000, total_earnings_usd=0.00000000,
+                                total_balance_usd=0.00000000, active_investment="None", progress = 0 )
+    return render_template('user_dashboard.html')
+
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -288,7 +446,7 @@ def login():
             full_details = got_user_email
             if full_details.password_hash == password:  # For now, direct compare (should hash in production)
                 print("going to dashboard")
-                return redirect(url_for('index', email=email))
+                return redirect(url_for('user_dashboard_decider', email=email))
             else:
                 flash("Invalid user credentials", "danger")
                 return render_template('login.html', form=form)

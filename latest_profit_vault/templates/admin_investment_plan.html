@@ -23,7 +23,6 @@
         {{ form.max_amount(class="form-control", placeholder="e.g. 10000.00") }}
       </div>
     </div>
-
     <div class="form-row">
       <div class="form-group">
         {{ form.period_in_days.label }}
@@ -38,15 +37,11 @@
         {{ form.annual_roi(class="form-control", placeholder="e.g. 66.0") }}
       </div>
     </div>
-
     <div class="form-group">
       {{ form.comment.label }}
       {{ form.comment(class="form-control", rows="3", placeholder="Extra information about this plan...") }}
     </div>
-
     {{ form.submit(class="btn btn-primary full-width") }}
   </form>
 </div>
-
-
 {% endblock content %}

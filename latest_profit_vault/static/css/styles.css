@@ -1532,3 +1532,68 @@ body, html {
 .form-errors li {
   list-style-type: disc;
 }
+
+
+/* Progress Bar Container */
+.progress-container {
+  width: 80%;
+  max-width: 500px;
+  margin: 50px auto;
+  padding: 0 1rem;
+}
+
+/* Progress Label */
+.progress-label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+/* Custom Progress Bar Appearance */
+.progress-bar {
+  background-color: #3b82f6; /* Tailwind's blue-500 */
+  transition: width 0.5s ease;
+}
+
+/* Mobile Tweaks */
+@media (max-width: 576px) {
+  .progress-container {
+      margin: 30px auto;
+  }
+
+  .progress-label {
+      font-size: 14px;
+  }
+
+  .progress-bar {
+      font-size: 12px;
+  }
+}
+
+.investment-form-card {
+  max-width: 700px;
+  margin: auto;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.form-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.form-row .form-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  resize: vertical;
+  font-family: inherit;
+}

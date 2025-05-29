@@ -1,0 +1,51 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+<div class="card wallet-form-card">
+  <h2>Manage Admin Wallet Addresses</h2>
+  <p class="subtext">Add or update wallet addresses for various networks</p>
+
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group">
+      {{ form.erc20_address.label }}  
+      {{ form.erc20_address(class="form-control", placeholder="Enter ERC20 address") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.trc20_address.label }}  
+      {{ form.trc20_address(class="form-control", placeholder="Enter TRC20 address") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.sol_address.label }}  
+      {{ form.sol_address(class="form-control", placeholder="Enter Solana address") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.bep20_address.label }}  
+      {{ form.bep20_address(class="form-control", placeholder="Enter BEP20 address") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.polygon_pos_address.label }}  
+      {{ form.polygon_pos_address(class="form-control", placeholder="Enter Polygon POS address") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.ton_address.label }}  
+      {{ form.ton_address(class="form-control", placeholder="Enter TON address") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.arbitrum_one_address.label }}  
+      {{ form.arbitrum_one_address(class="form-control", placeholder="Enter Arbitrum One address") }}
+    </div>
+
+    <div class="form-group mt-4">
+      {{ form.submit(class="btn btn-primary full-width") }}
+    </div>
+  </form>
+</div>
+{% endblock content %}

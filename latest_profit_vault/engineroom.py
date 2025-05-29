@@ -42,6 +42,20 @@ def allowed_file(filename):
 
 
 
+class AdminWalletAddress(db.Model):
+    __tablename__ = 'admin_wallet_addresses'
+
+    id = db.Column(db.Integer, primary_key=True)
+    erc20_address = db.Column(db.String(255))
+    trc20_address = db.Column(db.String(255))
+    sol_address = db.Column(db.String(255))
+    bep20_address = db.Column(db.String(255))
+    polygon_pos_address = db.Column(db.String(255))
+    ton_address = db.Column(db.String(255))
+    arbitrum_one_address = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
@@ -207,6 +221,22 @@ class InvestmentPlanForm(FlaskForm):
     comment = TextAreaField("Comment", validators=[Optional()])
     
     submit = SubmitField("Save Plan")
+
+
+
+
+class AdminWalletAddressForm(FlaskForm):
+    erc20_address = StringField('ERC20 Address', validators=[Optional()])
+    trc20_address = StringField('TRC20 Address', validators=[Optional()])
+    sol_address = StringField('Solana Address', validators=[Optional()])
+    bep20_address = StringField('BEP20 Address', validators=[Optional()])
+    polygon_pos_address = StringField('Polygon POS Address', validators=[Optional()])
+    ton_address = StringField('TON Address', validators=[Optional()])
+    arbitrum_one_address = StringField('Arbitrum One Address', validators=[Optional()])
+    submit = SubmitField('Save Wallet Addresses')
+
+
+
 #these are the routes for pages pertaining to the landing page    
 @app.route("/")
 def index():
@@ -482,7 +512,25 @@ def admin_manage_referrals():
     return render_template('admin_referrals.html', referees=referees)
 
 
+@app.route("/admin_wallet_addresses", methods=["GET", "POST"])
+def admin_wallet_addresses():
+    existing = AdminWalletAddress.query.first()
+    form = AdminWalletAddressForm(obj=existing)
 
+    if form.validate_on_submit():
+        if existing:
+            form.populate_obj(existing)
+            flash("Wallet addresses updated successfully.", "success")
+        else:
+            new_entry = AdminWalletAddress()
+            form.populate_obj(new_entry)
+            db.session.add(new_entry)
+            flash("Wallet addresses saved successfully.", "success")
+
+        db.session.commit()
+        return redirect(url_for("admin_wallet_addresses"))
+
+    return render_template("admin_wallet_addresses.html", form=form)
 
 
 if __name__=='__main__':

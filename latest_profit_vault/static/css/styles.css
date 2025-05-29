@@ -1597,3 +1597,79 @@ textarea {
   resize: vertical;
   font-family: inherit;
 }
+
+.referral-table-card {
+  padding: 25px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+}
+
+.referral-table-card h2 {
+  font-size: 22px;
+  margin-bottom: 5px;
+}
+
+.referral-table-card .subtext {
+  font-size: 14px;
+  color: #6c757d;
+  margin-bottom: 20px;
+}
+
+.responsive-table-wrapper {
+  overflow-x: auto;
+}
+
+.referral-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.referral-table th, .referral-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  font-size: 15px;
+}
+
+.referral-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.reward-input {
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  width: 120px;
+}
+
+.btn-confirm {
+  background-color: #1d3db8;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-confirm:hover {
+  background-color: #15339f;
+}
+
+@media (max-width: 768px) {
+  .referral-table th,
+  .referral-table td {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .reward-input {
+    width: 100px;
+  }
+}

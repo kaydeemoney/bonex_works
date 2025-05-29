@@ -13,7 +13,7 @@ from sqlalchemy.exc import IntegrityError
 import os
 from werkzeug.utils import secure_filename
 from PIL import Image, ImageDraw
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import string
 import secrets
 
@@ -54,12 +54,11 @@ class User(db.Model):
     state = db.Column(db.String(50), nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     transaction_pin = db.Column(db.String(4), nullable=False)
-    username = db.Column(db.String(4), nullable=False)
-    referral_code = db.Column(db.String(4), nullable=False)
-    referred_by = db.Column(db.String(4), nullable=False)
-    is_admin = db.Column(db.String(4), nullable=False)
-    user_id = db.Column(db.String(4), nullable=False)
-    profile_picture_id = db.Column(db.String(4), nullable=False)
+    username = db.Column(db.String(20), nullable=False)
+    registration_referral_id = db.Column(db.String(100), nullable=True)
+    is_admin = db.Column(db.String(4), nullable=True)
+    user_id = db.Column(db.String(100), nullable=False)
+    profile_picture_id = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -145,8 +144,6 @@ class CryptoWallet(db.Model):
     total_balance_usd = db.Column(db.Numeric(20, 8), default=0.00000000)
     total_earnings_usd = db.Column(db.Numeric(20, 8), default=0.00000000)
     total_invested_usd = db.Column(db.Numeric(20, 8), default=0.00000000)
-    referral_code = db.Column(db.String(20), unique=True, nullable=True)
-    referred_by = db.Column(db.String(20), nullable=True)
     referral_earnings_usd = db.Column(db.Numeric(20, 8), default=0.00000000)
     active_investments_count = db.Column(db.Integer, default=0)
     last_investment_date = db.Column(db.DateTime, nullable=True)
@@ -175,8 +172,7 @@ class SignupForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message="Passwords must match")])   
     username = StringField('Preferred Username', validators=[DataRequired()])
-    referral_code = StringField('Referral Code (optional)', validators=[Optional()])
-    referred_by = StringField('Referred By (optional)', validators=[Optional()]) 
+    registration_referral_id = StringField('Referral Code (optional)', validators=[Optional()])
     transaction_pin = StringField('Transaction Pin', validators=[DataRequired(), Length(min=4, max=4)])
     reenter_transaction_pin = StringField('Re-enter Transaction Pin', validators=[DataRequired(), EqualTo('transaction_pin', message="Pins must match")])
     submit = SubmitField('Register')
@@ -261,9 +257,7 @@ def user_dashboard_decider():
     pic_id=user_table_details.profile_picture_id
     user_id=pic_id
     is_admin=user_table_details.is_admin
-    referred_by=user_table_details.referred_by
-    referral_code = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
-
+   
 
     uploads_folder = os.path.join(app.static_folder, 'uploads')
     print(pic_id)
@@ -290,8 +284,6 @@ def user_dashboard_decider():
         user_last_investment_date=user_type.last_investment_date
         user_active_investment_count=user_type.active_investment_count
         user_referral_earnings_usd=user_type.referral_earnings
-        user_referred_by=user_type.referred_by
-        user_referral_code=user_type.referral_code
         user_total_invested_usd=user_type.total_invested_usd
         user_total_earnings_usd=user_type.total_earnings_usd
         user_total_balance_usd=user_type.total_balance_usd
@@ -304,7 +296,7 @@ def user_dashboard_decider():
                                 withdrawable_balance=user_withdrawable_balance, roi_percentage=user_roi_percentage,
                                 last_investment_date=user_last_investment_date, active_investments_count=
                                 user_active_investment_count, referral_earnings_usd=user_referral_earnings_usd,
-                                referred_by=user_referred_by,referral_code=user_referral_code,
+                               referral_code=user_id,
                                 total_invested_usd=user_total_invested_usd, total_earnings_usd=user_total_earnings_usd,
                                 total_balance_usd=user_total_balance_usd, active_investment=active_investment )
         
@@ -319,8 +311,8 @@ def user_dashboard_decider():
         return render_template("user_dashboard.html", first_name=first_name, last_name=last_name,email=email, 
                                profile_picture=profile_picture, user_id=user_id, account_status="new_active",last_login_date=datetime.now(),
                                 withdrawable_balance=0.00000000, roi_percentage=0.00, last_investment_date=None,
-                                active_investments_count=0, referral_earnings_usd=0.00, referred_by=referred_by,
-                                referral_code=referral_code, total_invested_usd=0.00000000, total_earnings_usd=0.00000000,
+                                active_investments_count=0, referral_earnings_usd=0.00,
+                                referral_code=user_id, total_invested_usd=0.00000000, total_earnings_usd=0.00000000,
                                 total_balance_usd=0.00000000, active_investment="None", progress = 0 )
     return render_template('user_dashboard.html')
 
@@ -378,8 +370,7 @@ def signup():
         password = form.password.data
         confirm_password = form.confirm_password.data
         username = form.username.data
-        referral_code = form.referral_code.data
-        referred_by = form.referred_by.data
+        registration_referral_id = form.registration_referral_id.data
         transaction_pin = form.transaction_pin.data
         reenter_transaction_pin = form.reenter_transaction_pin.data
         user_id = profile_pic_name
@@ -399,7 +390,7 @@ def signup():
         user = User(
             first_name=first_name, last_name=last_name, email=email, mobile=mobile, gender=gender,
             country=country, state=state, password_hash=password, transaction_pin=transaction_pin,
-            username=username, referral_code=referral_code, referred_by=referred_by, is_admin=None,
+            username=username, registration_referral_id=registration_referral_id, is_admin=None,
             user_id=user_id, profile_picture_id=user_id, created_at=created_at
         )
         try:
@@ -456,6 +447,43 @@ def login():
             return render_template('login.html', form=form)
 
     return render_template('login.html', form=form)
+
+
+
+@app.route("/admin_manage_referrals", methods=['GET', 'POST'])
+def admin_manage_referrals():
+    if request.method == 'POST':
+        user_id = request.form.get('referee_id')
+
+        try:
+            reward = Decimal(request.form.get('reward_amount', '0.00'))
+        except InvalidOperation:
+            flash("Invalid reward amount", 'danger')
+            return redirect(url_for('admin_manage_referrals'))
+
+
+        wallet = CryptoWallet.query.filter_by(user_id=user_id).first()
+
+        if wallet:
+            wallet.total_balance_usd += reward
+            wallet.total_earnings_usd += reward
+            wallet.referral_earnings_usd += reward
+            wallet.withdrawable_balance += reward
+            wallet.last_updated = datetime.utcnow()
+            db.session.commit()
+            flash(f"Reward of ${reward} confirmed for user {user_id}", 'success')
+        else:
+            flash(f"Wallet not found for user {user_id}", 'danger')
+
+        return redirect(url_for('admin_manage_referrals'))
+
+    # GET: show all users with a valid referral
+    referees = User.query.filter(User.registration_referral_id.isnot(None)).all()
+    return render_template('admin_referrals.html', referees=referees)
+
+
+
+
 
 if __name__=='__main__':
 	app.run(debug=True)

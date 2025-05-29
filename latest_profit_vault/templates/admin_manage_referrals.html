@@ -1,0 +1,41 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+<div class="card referral-table-card">
+  <h2>Referral Rewards Management</h2>
+  <p class="subtext">Confirm and reward referrals made by users</p>
+
+  <div class="responsive-table-wrapper">
+    <table class="referral-table">
+      <thead>
+        <tr>
+          <th>Referee ID</th>
+          <th>Time of Creation</th>
+          <th>Reward Amount ($)</th>
+          <th>Confirm</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in referees %}
+        <form method="POST">
+        <tr>
+          
+            <td>{{ user.user_id }}</td>
+            <td>{{ user.created_at }}</td>
+            <td>
+              <input type="text" name="reward_amount" class="reward-input" placeholder="e.g. 2000.00" required />
+              <input type="hidden" name="referee_id" value="{{ user.user_id }}" />
+            </td>
+            <td>
+              <button type="submit" class="btn-confirm">Confirm</button>
+            </td>
+          </form>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock content %}
+
+

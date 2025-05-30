@@ -1,0 +1,56 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+<div class="card deposit-table-card">
+  <h2>Pending Deposits Management</h2>
+  <p class="subtext">Review and manage pending deposit confirmations</p>
+
+  <div class="responsive-table-wrapper">
+    <table class="referral-table">
+      <thead>
+        <tr>
+          <th>User ID</th>
+          <th>Amount Deposited</th>
+          <th>Sender Wallet Address</th>
+          <th>Wallet Network</th>
+          <th>Estimated Sending Time</th>
+          <th>Comment</th>
+          <th>Status</th>
+          <th>Confirm</th>
+          <th>Reject</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for deposit in deposits %}
+        <tr>
+          <form method="POST">
+            <td>{{ deposit.user_id }}</td>
+            <td>${{ "%.2f"|format(deposit.amount_deposited) }}</td>
+            <td>{{ deposit.senders_wallet_address }}</td>
+            <td>{{ deposit.senders_wallet_network }}</td>
+            <td>{{ deposit.estimated_time_of_sending }}</td>
+            <td>{{ deposit.comment }}</td>
+            <td>
+              {% if deposit.status == 0 %}
+                Pending
+              {% elif deposit.status == 1 %}
+                Rejected
+              {% elif deposit.status == 2 %}
+                Confirmed
+              {% endif %}
+            </td>
+            <td>
+              <input type="hidden" name="user_id" value="{{ deposit.user_id }}">
+              <button type="submit" name="action" value="confirm" class="btn-confirm">Confirm</button>
+            </td>
+            <td>
+              <button type="submit" name="action" value="reject" class="btn-reject">Reject</button>
+            </td>
+          </form>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -101,16 +101,6 @@ class User_Investments(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-class Deposits(db.Model):
-    __tablename__ = 'deposits'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer,  nullable=False)
-    amount = db.Column(db.Numeric(20, 2), nullable=False)
-    status = db.Column(db.Enum('pending', 'approved', 'rejected'), default='pending')
-    transaction_id = db.Column(db.String(100), nullable=False)
-    network = db.Column(db.String(50), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
 class Withdrawal(db.Model):
     __tablename__ = 'withdrawal'
     id = db.Column(db.Integer, primary_key=True)
@@ -122,16 +112,6 @@ class Withdrawal(db.Model):
     network = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-
-class Referral(db.Model):
-    __tablename__ = 'Referral'  # match the raw SQL capitalization
-    id = db.Column(db.Integer, primary_key=True)
-    referrer_id = db.Column(db.Integer,  nullable=False)
-    referred_user_id = db.Column(db.Integer, nullable=False)
-    commission = db.Column(db.Float, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-
 class Transaction(db.Model):
     __tablename__ = 'transaction'
     id = db.Column(db.Integer, primary_key=True)
@@ -139,16 +119,6 @@ class Transaction(db.Model):
     reference_id = db.Column(db.Integer,  nullable=False)
     transaction_type = db.Column(db.String(50), nullable=False)  # deposit, withdrawal, etc.
     amount = db.Column(db.Float, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class wallet_settings(db.Model):
-    __tablename__ = 'wallet_settings'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False)
-    current_wallet_address = db.Column(db.Integer, nullable=False)
-    former_wallet_address= db.Column(db.String(50), nullable=True)  # deposit, withdrawal, etc.
-    amount = db.Column(db.Float, nullable=False)
-    destination_wallet=db.Column(db.String(50), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 class CryptoWallet(db.Model):
     __tablename__ = 'crypto_wallet'
@@ -168,7 +138,17 @@ class CryptoWallet(db.Model):
     date_joined = db.Column(db.DateTime, default=datetime.utcnow)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class Deposit(db.Model):
+    __tablename__ = 'deposits'
 
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(100), nullable=False)
+    amount_deposited = db.Column(db.Numeric(10, 2), nullable=False)
+    senders_wallet_address = db.Column(db.String(255), nullable=False)
+    senders_wallet_network = db.Column(db.String(100), nullable=False)
+    estimated_time_of_sending = db.Column(db.DateTime, nullable=False)
+    comment = db.Column(db.String(255))
+    status = db.Column(db.Integer, default=0)  # 0 = pending, 1 = rejected, 2 = confirmed
 
 class SignupForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
@@ -532,6 +512,31 @@ def admin_wallet_addresses():
 
     return render_template("admin_wallet_addresses.html", form=form)
 
+
+
+@app.route("/admin_manage_deposits", methods=["GET", "POST"])
+def admin_manage_deposits():
+    if request.method == "POST":
+        user_id = request.form.get("user_id")
+        action = request.form.get("action")
+
+        deposit = Deposit.query.filter_by(user_id=user_id, status=0).first()
+
+        if deposit:
+            if action == "confirm":
+                deposit.status = 2
+                flash(f"Deposit by {user_id} confirmed.", "success")
+            elif action == "reject":
+                deposit.status = 1
+                flash(f"Deposit by {user_id} rejected.", "danger")
+            db.session.commit()
+        else:
+            flash(f"No pending deposit found for user {user_id}.", "warning")
+
+        return redirect(url_for("admin_manage_deposits"))
+
+    deposits = Deposit.query.filter_by(status=0).all()
+    return render_template("admin_manage_deposits.html", deposits=deposits)
 
 if __name__=='__main__':
 	app.run(debug=True)

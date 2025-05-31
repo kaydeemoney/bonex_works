@@ -1,31 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <title>Profit Vault Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
+
 <body>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    <ul class="flashes">
-      {% for category, message in messages %}
-        <li class="{{ category }}">{{ message }}</li>
-      {% endfor %}
-    </ul>
+  <ul class="flashes">
+    {% for category, message in messages %}
+    <li class="{{ category }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
   {% endif %}
-{% endwith %}
+  {% endwith %}
 
 
   <div class="menu-toggle" onclick="toggleSidebar()">
     <i class="fa-solid fa-bars"></i>
   </div>
-  
+
   <div class="container">
     <div class="sidebar">
       <div class="sidebar-header">
@@ -35,38 +37,50 @@
       <ul class="nav-menu">
 
 
-        
+
+        <a href="{{ url_for('admin_dashboard') }}" style="text-decoration: none; color: inherit;">
+          <li class="nav-item active">
+            <i class="fa-solid fa-table-cells"></i>
+            <span>Admin Dashboard</span>
+          </li>
+        </a>
+
         <a href="{{ url_for('admin_investment_plan') }}" style="text-decoration: none; color: inherit;">
           <li class="nav-item active">
             <i class="fa-solid fa-table-cells"></i>
-            <span>Add/Edit Investments</span>
+            <span>Upload Investments</span>
           </li>
         </a>
-        
-        <li class="nav-item">
-          <i class="fa-solid fa-list-check"></i>
-          <span>Investment Plans</span>
-        </li>
-        <li class="nav-item">
-          <i class="fa-solid fa-dollar-sign"></i>
-          <span>Deposit</span>
-        </li>
-        <li class="nav-item">
-          <i class="fa-solid fa-right-left"></i>
-          <span>Withdraw</span>
-        </li>
-        <li class="nav-item">
-          <i class="fa-solid fa-user-group"></i>
-          <span>Referral Program</span>
-        </li>
-        <li class="nav-item">
-          <i class="fa-solid fa-clock-rotate-left"></i>
-          <span>Transaction History</span>
-        </li>
-        <li class="nav-item">
-          <i class="fa-solid fa-user"></i>
-          <span>My Profile</span>
-        </li>
+
+        <a href="{{ url_for('admin_manage_referrals') }}" style="text-decoration: none; color: inherit;">
+          <li class="nav-item active">
+            <i class="fa-solid fa-table-cells"></i>
+            <span>Manage Referrals</span>
+          </li>
+        </a>
+
+        <a href="{{ url_for('admin_wallet_addresses') }}" style="text-decoration: none; color: inherit;">
+          <li class="nav-item active">
+            <i class="fa-solid fa-table-cells"></i>
+            <span>Edit Wallet Addresses</span>
+          </li>
+        </a>
+
+        <a href="{{ url_for('admin_manage_deposits') }}" style="text-decoration: none; color: inherit;">
+          <li class="nav-item active">
+            <i class="fa-solid fa-table-cells"></i>
+            <span>Manage Deposits</span>
+          </li>
+        </a>
+
+
+        <a href="{{ url_for('admin_users_list') }}" style="text-decoration: none; color: inherit;">
+          <li class="nav-item active">
+            <i class="fa-solid fa-table-cells"></i>
+            <span>Edit User Info</span>
+          </li>
+        </a>
+
       </ul>
       <div class="logout">
         <i class="fa-solid fa-right-from-bracket"></i>
@@ -88,4 +102,5 @@
   <script src="script.js"></script>
 
 </body>
+
 </html>

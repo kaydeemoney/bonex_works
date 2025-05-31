@@ -2,50 +2,33 @@
 
 {% block content %}
 
-<div class="card investment-form-card">
-  <h2>Add New Investment Plan</h2>
-  <p class="subtext">Define new investment options for users</p>
-  <form method="POST">
-    {{ form.hidden_tag() }}
+<div class="card dashboard-card">
+  <h2>Admin Dashboard</h2>
+  <p class="subtext">Welcome to the Admin Control Panel</p>
 
-    <div class="form-group">
-      {{ form.name.label }}  
-      {{ form.name(class="form-control", placeholder="Enter plan name") }}
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+    <div class="stat-box">
+      <h3 class="stat-title">Total Users</h3>
+      <p class="stat-value">1,204</p>
     </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        {{ form.min_amount.label }}
-        {{ form.min_amount(class="form-control", placeholder="e.g. 100.00") }}
-      </div>
-      <div class="form-group">
-        {{ form.max_amount.label }}
-        {{ form.max_amount(class="form-control", placeholder="e.g. 10000.00") }}
-      </div>
+    <div class="stat-box">
+      <h3 class="stat-title">Total Deposits</h3>
+      <p class="stat-value">$152,340.00</p>
     </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        {{ form.period_in_days.label }}
-        {{ form.period_in_days(class="form-control", placeholder="e.g. 30") }}
-      </div>
-      <div class="form-group">
-        {{ form.monthly_roi.label }}
-        {{ form.monthly_roi(class="form-control", placeholder="e.g. 5.5") }}
-      </div>
-      <div class="form-group">
-        {{ form.annual_roi.label }}
-        {{ form.annual_roi(class="form-control", placeholder="e.g. 66.0") }}
-      </div>
+    <div class="stat-box">
+      <h3 class="stat-title">Pending Requests</h3>
+      <p class="stat-value">17</p>
     </div>
+  </div>
 
-    <div class="form-group">
-      {{ form.comment.label }}
-      {{ form.comment(class="form-control", rows="3", placeholder="Extra information about this plan...") }}
-    </div>
-
-    {{ form.submit(class="btn btn-primary full-width") }}
-  </form>
+  <div class="mt-10">
+    <h3 class="section-heading">Recent Activity</h3>
+    <ul class="activity-list">
+      <li>✅ User <strong>john_doe</strong> confirmed a deposit.</li>
+      <li>⚠️ Wallet update for <strong>TRC20</strong> was made.</li>
+      <li>🔄 Admin <strong>admin123</strong> logged in.</li>
+    </ul>
+  </div>
 </div>
 
 

@@ -9,7 +9,7 @@ from config import Config
 from datetime import datetime, timedelta
 #this is for the validation efficiency of the wtf form you must always include it
 from flask_wtf.csrf import CSRFProtect
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 import os
 from werkzeug.utils import secure_filename
 from PIL import Image, ImageDraw
@@ -253,80 +253,6 @@ def admin_investment_plan():
             flash("Investment plan added successfully!", "success")
     return render_template("admin_investment_plan.html", form=form)
 
-
-
-
-
-@app.route("/user_dashboard_decider")
-def user_dashboard_decider():
-    email = request.args.get('email')
-    user_table_details=User.query.filter_by(email=email).first()
-    first_name=user_table_details.first_name
-    last_name=user_table_details.last_name
-    email=user_table_details.email
-    pic_id=user_table_details.profile_picture_id
-    user_id=pic_id
-    is_admin=user_table_details.is_admin
-   
-
-    uploads_folder = os.path.join(app.static_folder, 'uploads')
-    print(pic_id)
-    for file_name in os.listdir(uploads_folder):
-        if file_name.startswith(pic_id):
-            print("e dey")
-            profile_picture = file_name
-            break
-        else:
-            profile_picture = "noname.png"
-    if not pic_id:
-        profile_picture = "noname.png"  
-    print(profile_picture)
-
-    if is_admin!=None:
-        return render_template("admin_dashboard.html")
-
-    user_type= CryptoWallet.query.filter_by(user_id=user_id).first()
-    if user_type:
-        
-        user_account_status="active_member"
-        user_withdrawable_balance=user_type.withdrawable_balance
-        user_roi_percentage=user_type.roi_percentage
-        user_last_investment_date=user_type.last_investment_date
-        user_active_investment_count=user_type.active_investment_count
-        user_referral_earnings_usd=user_type.referral_earnings
-        user_total_invested_usd=user_type.total_invested_usd
-        user_total_earnings_usd=user_type.total_earnings_usd
-        user_total_balance_usd=user_type.total_balance_usd
-
-        active_investment=User_Investments.query.filter_by(user_id=user_id).all()
-
-        return render_template("user_dashboard.html", first_name=first_name, last_name=last_name,
-                               email=email, profile_picture=profile_picture,user_id=user_id, account_status=user_account_status,
-                               last_login_date=datetime.now(),
-                                withdrawable_balance=user_withdrawable_balance, roi_percentage=user_roi_percentage,
-                                last_investment_date=user_last_investment_date, active_investments_count=
-                                user_active_investment_count, referral_earnings_usd=user_referral_earnings_usd,
-                               referral_code=user_id,
-                                total_invested_usd=user_total_invested_usd, total_earnings_usd=user_total_earnings_usd,
-                                total_balance_usd=user_total_balance_usd, active_investment=active_investment )
-        
-#a wholelot of things to still be done here
-
-
-
-
-
-
-    else:
-        return render_template("user_dashboard.html", first_name=first_name, last_name=last_name,email=email, 
-                               profile_picture=profile_picture, user_id=user_id, account_status="new_active",last_login_date=datetime.now(),
-                                withdrawable_balance=0.00000000, roi_percentage=0.00, last_investment_date=None,
-                                active_investments_count=0, referral_earnings_usd=0.00,
-                                referral_code=user_id, total_invested_usd=0.00000000, total_earnings_usd=0.00000000,
-                                total_balance_usd=0.00000000, active_investment="None", progress = 0 )
-    return render_template('user_dashboard.html')
-
-
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     form = SignupForm()
@@ -405,6 +331,8 @@ def signup():
         )
         try:
             db.session.add(user)
+            user_account=CryptoWallet(user_id=user_id)
+            db.session.add(user_account)
             db.session.commit()
             flash(f"Account created for {first_name} {last_name}!", 'success')
             print("account created")
@@ -425,6 +353,9 @@ def signup():
 
             else:
                 flash('An error occurred during registration. Please try again.', 'error')
+
+        
+          
             
 
     else:
@@ -465,6 +396,9 @@ def admin_manage_referrals():
     if request.method == 'POST':
         user_id = request.form.get('referee_id')
 
+        current_user=User.query.filter_by(user_id=user_id).first()
+        refree_id=current_user.registration_referral_id
+
         try:
             reward = Decimal(request.form.get('reward_amount', '0.00'))
         except InvalidOperation:
@@ -472,7 +406,7 @@ def admin_manage_referrals():
             return redirect(url_for('admin_manage_referrals'))
 
 
-        wallet = CryptoWallet.query.filter_by(user_id=user_id).first()
+        wallet = CryptoWallet.query.filter_by(user_id=refree_id).first()
 
         if wallet:
             wallet.total_balance_usd += reward
@@ -480,8 +414,13 @@ def admin_manage_referrals():
             wallet.referral_earnings_usd += reward
             wallet.withdrawable_balance += reward
             wallet.last_updated = datetime.utcnow()
+            user_id.registration_referral_id=None
             db.session.commit()
-            flash(f"Reward of ${reward} confirmed for user {user_id}", 'success')
+            flash(f"Reward of ${reward} confirmed for user {user_id}, refered by {refree_id} ", 'success')
+
+            
+
+
         else:
             flash(f"Wallet not found for user {user_id}", 'danger')
 
@@ -489,7 +428,7 @@ def admin_manage_referrals():
 
     # GET: show all users with a valid referral
     referees = User.query.filter(User.registration_referral_id.isnot(None)).all()
-    return render_template('admin_referrals.html', referees=referees)
+    return render_template('admin_manage_referrals.html', referees=referees)
 
 
 @app.route("/admin_wallet_addresses", methods=["GET", "POST"])
@@ -537,6 +476,103 @@ def admin_manage_deposits():
 
     deposits = Deposit.query.filter_by(status=0).all()
     return render_template("admin_manage_deposits.html", deposits=deposits)
+
+
+@app.route("/admin_users_list")
+def admin_users_list():
+    users = User.query.all()
+    return render_template("users.html", users=users)
+
+# Show edit form
+@app.route("/edit_user/<string:user_id>", methods=["GET"])
+def edit_user(user_id):
+    user = User.query.filter_by(user_id=user_id).first_or_404()
+    return render_template("edit_user.html", user=user)
+
+# Handle user update
+@app.route("/update_user/<string:user_id>", methods=["POST"])
+def update_user(user_id):
+    user = User.query.filter_by(user_id=user_id).first_or_404()
+    try:
+        user.first_name = request.form['first_name']
+        user.last_name = request.form['last_name']
+        user.email = request.form['email']
+        user.mobile = request.form['mobile']
+        user.gender = request.form['gender']
+        user.country = request.form['country']
+        user.state = request.form['state']
+        user.username = request.form['username']
+        user.transaction_pin = request.form['transaction_pin']
+        user.registration_referral_id = request.form['registration_referral_id']
+        user.is_admin = request.form.get('is_admin')
+        
+        db.session.commit()
+        flash("User updated successfully.", "success")
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        flash(f"Update failed: {str(e)}", "danger")
+
+    return redirect(url_for("admin_users_list"))
+
+# Delete user
+@app.route("/delete_user/<string:user_id>", methods=["POST"])
+def delete_user(user_id):
+    user = User.query.filter_by(user_id=user_id).first_or_404()
+    try:
+        db.session.delete(user)
+        db.session.commit()
+        flash("User deleted successfully.", "success")
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        flash(f"Deletion failed: {str(e)}", "danger")
+
+    return redirect(url_for("admin_users_list"))
+
+
+
+
+@app.route("/user_dashboard")
+def user_dashboard():
+    email = request.args.get('email')
+    user_table_details=User.query.filter_by(email=email).first()
+    first_name=user_table_details.first_name
+    last_name=user_table_details.last_name
+    email=user_table_details.email
+    pic_id=user_table_details.profile_picture_id
+    user_id=pic_id
+    is_admin=user_table_details.is_admin
+   
+
+    uploads_folder = os.path.join(app.static_folder, 'uploads')
+    print(pic_id)
+    for file_name in os.listdir(uploads_folder):
+        if file_name.startswith(pic_id):
+            print("e dey")
+            profile_picture = file_name
+            break
+        else:
+            profile_picture = "noname.png"
+    if not pic_id:
+        profile_picture = "noname.png"  
+    print(profile_picture)
+
+    if is_admin!=None:
+        return render_template("admin_dashboard.html")
+
+    user_type= CryptoWallet.query.filter_by(user_id=user_id).first()
+    if user_type:
+        
+        user_account_status="active_member"
+        user_withdrawable_balance=user_type.withdrawable_balance
+        user_roi_percentage=user_type.roi_percentage
+        user_last_investment_date=user_type.last_investment_date
+        user_active_investments_count=user_type.active_investments_count
+        user_referral_earnings_usd=user_type.referral_earnings
+        user_total_invested_usd=user_type.total_invested_usd
+        user_total_earnings_usd=user_type.total_earnings_usd
+        user_total_balance_usd=user_type.total_balance_usd
+
+        active_investment=User_Investments.query.filter_by(user_id=user_id).all()
 
 if __name__=='__main__':
 	app.run(debug=True)

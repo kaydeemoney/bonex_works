@@ -6,10 +6,24 @@
   <p class="subtext">Confirm and reward referrals made by users</p>
 
   <div class="responsive-table-wrapper">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-container">
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
     <table class="referral-table">
       <thead>
         <tr>
           <th>Referee ID</th>
+          
+
           <th>Time of Creation</th>
           <th>Reward Amount ($)</th>
           <th>Confirm</th>
@@ -17,12 +31,13 @@
       </thead>
       <tbody>
         {% for user in referees %}
-        <form method="POST">
         <tr>
-          
-            <td>{{ user.user_id }}</td>
-            <td>{{ user.created_at }}</td>
-            <td>
+          <td>{{ user.registration_referral_id }}</td>
+          <td>{{ user.created_at }}</td>
+          <td>
+        <form method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+         
               <input type="text" name="reward_amount" class="reward-input" placeholder="e.g. 2000.00" required />
               <input type="hidden" name="referee_id" value="{{ user.user_id }}" />
             </td>

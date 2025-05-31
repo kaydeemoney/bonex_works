@@ -1713,3 +1713,218 @@ textarea {
     padding: 1rem;
   }
 }
+
+.card.dashboard-card {
+  padding: 2rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
+
+.stat-box {
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 1rem;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0,0,0,0.02);
+}
+
+.stat-title {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #111827;
+}
+
+.section-heading {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.activity-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.activity-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.95rem;
+}
+
+
+.user-list-card {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  margin-top: 30px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #1d2b53;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.styled-table thead {
+  background-color: #f1f3f6;
+}
+
+.styled-table th, 
+.styled-table td {
+  padding: 14px 20px;
+  text-align: left;
+  font-size: 15px;
+  color: #333;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.styled-table tbody tr:hover {
+  background-color: #f9fbfd;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.2s ease;
+}
+
+.btn-edit {
+  background-color: #1d3db8;
+  color: white;
+}
+
+.btn-edit:hover {
+  background-color: #15339f;
+}
+
+.btn-delete {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-delete:hover {
+  background-color: #c0392b;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .styled-table th,
+  .styled-table td {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .btn {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+}
+
+
+.edit-user-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 25px;
+  color: #1d2b53;
+}
+
+.edit-user-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.edit-user-form input {
+  padding: 14px 16px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+}
+
+.edit-user-form input:focus {
+  border-color: #1d3db8;
+  outline: none;
+}
+
+.form-submit {
+  grid-column: 1 / -1;
+  margin-top: 10px;
+}
+
+.btn {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+  transition: background 0.2s ease;
+}
+
+.btn-save {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.btn-save:hover {
+  background-color: #27ae60;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .edit-user-container {
+    padding: 20px 15px;
+  }
+
+  .edit-user-form {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .btn {
+    font-size: 14px;
+  }
+}

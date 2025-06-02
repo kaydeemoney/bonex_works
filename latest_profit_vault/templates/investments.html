@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<section class="plans-header">
+  <h1>Investment Plans</h1>
+  <p>
+    Choose from our range of investment plans designed to maximize your returns.
+    Our plans offer competitive ROI rates and flexible investment periods.
+  </p>
+</section>
+
+<h1 style="text-align: center;">You will login again to proceed with investments</h1>
+
+<div class="plans">
+  {% for plan in plans %}
+  <div class="cardi">
+    <h2>{{ plan.name }}</h2>
+    <div class="icon-boxi">
+      <i class="fa-solid fa-chart-line"></i>
+    </div>
+    <div class="roi">
+      <span>Monthly ROI</span>
+      <div class="value">{{ plan.monthly_roi | round(0) }}%</div>
+      <div class="annual">
+        Annual ROI <strong>{{ plan.annual_roi | round(0) }}%</strong> &bull; Period <strong>{{ plan.period_in_days }} days</strong>
+      </div>
+    </div>
+    <div class="detailsi"><strong>Minimum Investment</strong> ${{ "{:,.2f}".format(plan.min_amount) }}</div>
+    <div class="detailsi"><strong>Maximum Investment</strong> ${{ "{:,.2f}".format(plan.max_amount) }}</div>
+    <div class="description">{{ plan.comment or 'No description provided.' }}</div>
+     <a href="{{ url_for('login_to_invest', plan_id=plan.id) }}">
+      <button class="btn">Invest Now</button>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock content %}

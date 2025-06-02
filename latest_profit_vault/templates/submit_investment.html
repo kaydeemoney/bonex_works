@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Invest in {{ plan.name }}</h1>
+<p>Monthly ROI: {{ plan.monthly_roi }}% | Period: {{ plan.period_in_days }} days</p>
+<p>Min: ${{ plan.min_amount }}, Max: ${{ plan.max_amount }}</p>
+
+<div class="card investment-form-card">
+<form method="POST">
+  {{ form.hidden_tag() }}
+
+  <div class="form-group">
+    {{ form.amount_invested.label }} <br>
+    {{ form.amount_invested(size=30) }}
+  </div>
+
+  <div>
+    {{ form.submit() }}
+  </div>
+</form>
+
+{%  endblock content %}

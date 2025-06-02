@@ -2,7 +2,7 @@ from flask import Flask, Blueprint, render_template, request, redirect, url_for,
 from flask_wtf import FlaskForm
 from PIL import Image
 from flask_sqlalchemy import SQLAlchemy
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, DateField, TextAreaField, RadioField, FloatField, IntegerField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField,HiddenField, SelectField, DateField, TextAreaField, RadioField, FloatField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional, NumberRange
 import uuid, json
 from config import Config
@@ -87,6 +87,8 @@ class Investment_Plans(db.Model):
     annual_roi = db.Column(db.Float, nullable=False)
     comment = db.Column(db.String(200), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    plan_id = db.Column(db.String(100))
+
     
 
 class User_Investments(db.Model):
@@ -122,17 +124,16 @@ class Transaction(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 class CryptoWallet(db.Model):
     __tablename__ = 'crypto_wallet'
-
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.String(100), unique=True, nullable=True)
-    total_balance_usd = db.Column(db.Numeric(20, 8), default=0.00000000)
-    total_earnings_usd = db.Column(db.Numeric(20, 8), default=0.00000000)
-    total_invested_usd = db.Column(db.Numeric(20, 8), default=0.00000000)
-    referral_earnings_usd = db.Column(db.Numeric(20, 8), default=0.00000000)
-    active_investments_count = db.Column(db.Integer, default=0)
+    total_balance_usd = db.Column(db.Float)
+    total_earnings_usd = db.Column(db.Float)
+    total_invested_usd = db.Column(db.Float)
+    referral_earnings_usd = db.Column(db.Float)
+    active_investments_count = db.Column(db.Integer)
     last_investment_date = db.Column(db.DateTime, nullable=True)
-    roi_percentage = db.Column(db.Numeric(5, 2), default=0.00)
-    withdrawable_balance = db.Column(db.Numeric(20, 8), default=0.00000000)
+    roi_percentage = db.Column(db.Float)
+    withdrawable_balance = db.Column(db.Float)
     last_login_date = db.Column(db.DateTime, nullable=True)
     account_status = db.Column(db.String(20), default='Active')
     date_joined = db.Column(db.DateTime, default=datetime.utcnow)
@@ -215,6 +216,12 @@ class AdminWalletAddressForm(FlaskForm):
     arbitrum_one_address = StringField('Arbitrum One Address', validators=[Optional()])
     submit = SubmitField('Save Wallet Addresses')
 
+
+
+class InvestmentForm(FlaskForm):
+    plan_id = HiddenField('Plan ID', validators=[DataRequired()])
+    amount_invested = FloatField('Amount to Invest', validators=[DataRequired(), NumberRange(min=1)])
+    submit = SubmitField('Submit Investment')
 
 
 #these are the routes for pages pertaining to the landing page    
@@ -378,7 +385,7 @@ def login():
             full_details = got_user_email
             if full_details.password_hash == password:  # For now, direct compare (should hash in production)
                 print("going to dashboard")
-                return redirect(url_for('user_dashboard_decider', email=email))
+                return redirect(url_for('user_dashboard', email=email))
             else:
                 flash("Invalid user credentials", "danger")
                 return render_template('login.html', form=form)
@@ -388,6 +395,40 @@ def login():
             return render_template('login.html', form=form)
 
     return render_template('login.html', form=form)
+
+
+
+
+
+@app.route("/login_to_invest", methods=['GET', 'POST'])
+def login_to_invest():
+    form = LoginForm()  # Use the WTForm here
+    user_id = request.args.get('user_id')
+    if form.validate_on_submit():
+        print("validated")
+        email = form.email.data
+        password = form.password.data
+        got_user_email = User.query.filter_by(email=email).first()
+        
+        if got_user_email:
+            print("email valid")
+            user_id=got_user_email.user_id
+            full_details = got_user_email
+            if full_details.password_hash == password:  # For now, direct compare (should hash in production)
+                print("going to dashboard")
+                return redirect(url_for('submit_investment', user_id=user_id))
+            else:
+                flash("Invalid user credentials", "danger")
+                return render_template('login.html', form=form)
+        else:
+            flash("Email not found", "danger")
+            print("email not found ")
+            return render_template('login.html', form=form)
+
+    return render_template('login.html', form=form)
+
+
+
 
 
 
@@ -530,49 +571,103 @@ def delete_user(user_id):
 
 
 
-
 @app.route("/user_dashboard")
 def user_dashboard():
-    email = request.args.get('email')
-    user_table_details=User.query.filter_by(email=email).first()
-    first_name=user_table_details.first_name
-    last_name=user_table_details.last_name
-    email=user_table_details.email
-    pic_id=user_table_details.profile_picture_id
-    user_id=pic_id
-    is_admin=user_table_details.is_admin
-   
+    email = request.args.get('email', '').strip()
+    if not email:
+        return "Email parameter missing", 400
 
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return "User not found", 404
+
+    user_id = user.user_id
+    is_admin = user.is_admin
+    profile_picture = "noname.png"
+
+    # Profile picture logic
     uploads_folder = os.path.join(app.static_folder, 'uploads')
-    print(pic_id)
-    for file_name in os.listdir(uploads_folder):
-        if file_name.startswith(pic_id):
-            print("e dey")
-            profile_picture = file_name
-            break
-        else:
-            profile_picture = "noname.png"
-    if not pic_id:
-        profile_picture = "noname.png"  
-    print(profile_picture)
+    if os.path.isdir(uploads_folder) and user.profile_picture_id:
+        for file_name in os.listdir(uploads_folder):
+            if file_name.startswith(user.profile_picture_id):
+                profile_picture = file_name
+                break
 
-    if is_admin!=None:
-        return render_template("admin_dashboard.html")
+    # Admin logic
+    if is_admin:
+        return render_template("admin_dashboard.html", user=user, profile_picture=profile_picture)
 
-    user_type= CryptoWallet.query.filter_by(user_id=user_id).first()
-    if user_type:
-        
-        user_account_status="active_member"
-        user_withdrawable_balance=user_type.withdrawable_balance
-        user_roi_percentage=user_type.roi_percentage
-        user_last_investment_date=user_type.last_investment_date
-        user_active_investments_count=user_type.active_investments_count
-        user_referral_earnings_usd=user_type.referral_earnings
-        user_total_invested_usd=user_type.total_invested_usd
-        user_total_earnings_usd=user_type.total_earnings_usd
-        user_total_balance_usd=user_type.total_balance_usd
+    wallet = CryptoWallet.query.filter_by(user_id=user_id).first()
+    if not wallet:
+        return "Wallet not found", 404
 
-        active_investment=User_Investments.query.filter_by(user_id=user_id).all()
+    # Active & Completed investments
+    active_investments = User_Investments.query.filter_by(user_id=user_id, is_active=1).all()
+    completed_investments = User_Investments.query.filter_by(user_id=user_id, is_active=0).all()
+
+    def calculate_progress(start_date, end_date):
+        now = datetime.utcnow()
+        total_duration = (end_date - start_date).total_seconds()
+        elapsed = (now - start_date).total_seconds()
+        percent = (elapsed / total_duration) * 100 if total_duration > 0 else 100
+        return round(min(max(percent, 0), 100), 2)
+
+    # Attach plan details to investments
+    for inv in active_investments + completed_investments:
+        plan = Investment_Plans.query.filter_by(plan_id=inv.plan_id).first()
+        inv.name = plan.name if plan else "Unknown Plan"
+        inv.monthly_roi = plan.monthly_roi if plan else 0
+        inv.annual_roi = plan.annual_roi if plan else 0
+        inv.progress_percent = (
+            calculate_progress(inv.start_date, inv.end_date) 
+            if inv.is_active and inv.start_date and inv.end_date else 100
+        )
+        inv.end_date_str = inv.end_date.strftime('%d/%m/%Y') if inv.end_date else 'N/A'
+
+    return render_template("user_dashboard.html",
+                           user=user,
+                           profile_picture=profile_picture,
+                           wallet=wallet,
+                           active_investments=active_investments,
+                           completed_investments=completed_investments)
+
+
+
+@app.route('/investments')
+def investments():
+    plans = Investment_Plans.query.all()
+    return render_template('investments.html', plans=plans)
+
+@app.route('/submit_investment/<int:plan_id>', methods=['GET', 'POST'])
+def submit_investment(plan_id):
+    plan = Investment_Plans.query.get_or_404(plan_id)
+    form = InvestmentForm(plan_id=plan_id)  # Pre-fill plan_id
+
+    if form.validate_on_submit():
+        # Assuming you have a current_user system in place (like Flask-Login)
+        user_id = 1  # Replace with current_user.id
+
+        amount = form.amount_invested.data
+        start_date = datetime.utcnow()
+        end_date = start_date + timedelta(days=plan.period_in_days)
+
+        new_investment = User_Investments(
+            user_id=user_id,
+            plan_id=plan.id,
+            amount_invested=amount,
+            profit_earned=0.0,
+            start_date=start_date,
+            end_date=end_date,
+            is_active=True,
+            created_at=start_date
+        )
+        db.session.add(new_investment)
+        db.session.commit()
+        flash('Investment submitted successfully!', 'success')
+        return redirect(url_for('investments'))
+
+    return render_template('submit_investment.html', form=form, plan=plan)
+
 
 if __name__=='__main__':
 	app.run(debug=True)

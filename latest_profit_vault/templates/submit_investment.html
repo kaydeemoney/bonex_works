@@ -2,22 +2,60 @@
 
 {% block content %}
 
-<h1>Invest in {{ plan.name }}</h1>
-<p>Monthly ROI: {{ plan.monthly_roi }}% | Period: {{ plan.period_in_days }} days</p>
-<p>Min: ${{ plan.min_amount }}, Max: ${{ plan.max_amount }}</p>
+ <!-- Flash messages -->
+ {% with messages = get_flashed_messages(with_categories=true) %}
+ {% if messages %}
+   {% for category, message in messages %}
+     <div class="flash-message {{ category }}">
+       {{ message }}
+     </div>
+   {% endfor %}
+ {% endif %}
+{% endwith %}
+
+<!-- Form errors -->
+{% if form.errors %}
+ <div class="form-errors">
+   <ul>
+     {% for field, errors in form.errors.items() %}
+       {% for error in errors %}
+       <div class="flash-message {{ error }}">
+        {{ message }}
+      </div>
+       {% endfor %}
+     {% endfor %}
+   </ul>
+ </div>
+{% endif %}
+
+
+<div class="plan-detail-card">
+  <h1>Invest in {{ plan.name }}</h1>
+  <p class="roi-line">
+    Monthly ROI: <span>{{ plan.monthly_roi }}%</span> 
+    <span class="separator">|</span> 
+    Period: <span>{{ plan.period_in_days }} days</span>
+  </p>
+  <p class="amount-line">
+    Min: <span>${{ plan.min_amount }}</span>, 
+    Max: <span>${{ plan.max_amount }}</span>
+  </p>
+</div>
 
 <div class="card investment-form-card">
-<form method="POST">
-  {{ form.hidden_tag() }}
+  <form class="auth-form" method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    {{ form.plan_id() }}  <!-- 🛡️ Include this! -->
+  
+    <div class="form-group">
+      {{ form.amount_invested(class="auth-input", placeholder="Amount To Invest") }}
+    </div>
+  
+    <div>
+      <button type="submit" class="btn-primary">Invest</button>
+    </div>
+  </form>
+  
 
-  <div class="form-group">
-    {{ form.amount_invested.label }} <br>
-    {{ form.amount_invested(size=30) }}
-  </div>
-
-  <div>
-    {{ form.submit() }}
-  </div>
-</form>
 
 {%  endblock content %}

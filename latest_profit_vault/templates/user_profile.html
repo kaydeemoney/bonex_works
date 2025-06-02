@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+      <div class="profile-container">
+        <div class="left-panel">
+          <div class="card">
+            <div class="card-header">
+              <h2>Personal Information</h2>
+              <h3>Edit your information if needed and save changes</h3>
+            </div>
+            <form action="{{ url_for('user_profile_updating') }}" method="POST" class="info-grid">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <div class="form-group">
+                <label>First Name</label>
+                <input type="text" name="first_name" value="{{ user.first_name }}" />
+              </div>
+              <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" name="last_name" value="{{ user.last_name }}" />
+              </div>
+
+              <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" value="{{ user.username }}" />
+              </div>
+
+
+
+              <div class="form-group">
+                <label>Mobile Number</label>
+                <input type="text" name="mobile" value="{{ user.mobile }}" />
+              </div>
+              <div class="form-group">
+                <label>Gender</label>
+                <select name="gender">
+                  <option value="Male" {% if user.gender == 'Male' %}selected{% endif %}>Male</option>
+                  <option value="Female" {% if user.gender == 'Female' %}selected{% endif %}>Female</option>
+                </select>                
+              </div>
+              <div class="form-group">
+                <label>Country</label>
+                <input type="text" name="country" value="{{ user.country }}" />
+              </div>
+              <div class="form-group">
+                <label>State</label>
+                <input type="text" name="state" value="{{ user.state }}" />
+              </div>
+              <div class="form-group full-width">
+                <label>Email Address</label>
+                <input type="email" name="email" value="{{ user.email }}" />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Change Pin</label>
+                <input type="text" name="transaction_pin"  />
+              </div>
+
+
+              <div class="card">
+                
+                <button type="submit" class="outline-btn"><i class="fa-solid fa-lock"></i> Save Changes</button>
+              </div>
+
+              </form>
+            
+          </div>
+        </div>
+      
+        <div class="right-panel">
+          <div class="card center-text">
+            <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+            <p>{{ user.email }}</p>
+            
+          </div>
+          
+          </div>
+        </div>
+     
+
+
+
+      {% endblock content %}
+

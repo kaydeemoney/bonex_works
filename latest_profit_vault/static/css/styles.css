@@ -1929,3 +1929,37 @@ textarea {
   width: 0%;
   transition: width 0.5s ease;
 }
+
+.plan-detail-card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+  padding: 30px;
+  max-width: 600px;
+  margin: 40px auto;
+  font-family: 'Inter', sans-serif;
+}
+
+.plan-detail-card h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 16px;
+}
+
+.plan-detail-card p {
+  font-size: 15px;
+  color: #4b5563;
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.plan-detail-card span {
+  font-weight: 600;
+  color: #1d3db8;
+}
+
+.plan-detail-card .separator {
+  margin: 0 8px;
+  color: #9ca3af;
+}

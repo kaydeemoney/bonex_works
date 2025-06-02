@@ -372,28 +372,22 @@ def signup():
     return render_template('signup.html', form=form)
 
 
+
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-    form = LoginForm()  # Use the WTForm here
+    form = LoginForm()
     if form.validate_on_submit():
-        print("validated")
         email = form.email.data
         password = form.password.data
         got_user_email = User.query.filter_by(email=email).first()
         if got_user_email:
-            print("email valid")
-            full_details = got_user_email
-            if full_details.password_hash == password:  # For now, direct compare (should hash in production)
-                print("going to dashboard")
-                return redirect(url_for('user_dashboard', email=email))
+            if got_user_email.password_hash == password:
+                session['email'] = email  # Store email in session
+                return redirect(url_for('user_dashboard'))
             else:
                 flash("Invalid user credentials", "danger")
-                return render_template('login.html', form=form)
         else:
             flash("Email not found", "danger")
-            print("email not found ")
-            return render_template('login.html', form=form)
-
     return render_template('login.html', form=form)
 
 
@@ -403,7 +397,7 @@ def login():
 @app.route("/login_to_invest", methods=['GET', 'POST'])
 def login_to_invest():
     form = LoginForm()  # Use the WTForm here
-    user_id = request.args.get('user_id')
+    plan_id = request.args.get('plan_id')
     if form.validate_on_submit():
         print("validated")
         email = form.email.data
@@ -416,7 +410,7 @@ def login_to_invest():
             full_details = got_user_email
             if full_details.password_hash == password:  # For now, direct compare (should hash in production)
                 print("going to dashboard")
-                return redirect(url_for('submit_investment', user_id=user_id))
+                return redirect(url_for('submit_investment', user_id=user_id, plan_id=plan_id))
             else:
                 flash("Invalid user credentials", "danger")
                 return render_template('login.html', form=form)
@@ -530,6 +524,53 @@ def edit_user(user_id):
     user = User.query.filter_by(user_id=user_id).first_or_404()
     return render_template("edit_user.html", user=user)
 
+
+
+
+
+# Show edit form
+@app.route("/user_profile", methods=["GET"])
+def user_profile():
+    email=session.get('email')
+    user = User.query.filter_by(email=email).first_or_404()
+    return render_template("user_profile.html", user=user)
+
+
+# Handle user update
+@app.route("/user_profile_updating", methods=["POST"])
+def user_profile_updating():
+    email=session.get('email')
+    user = User.query.filter_by(email=email).first_or_404()
+    try:
+        user.first_name = request.form['first_name']
+        user.last_name = request.form['last_name']
+        user.email = request.form['email']
+        user.mobile = request.form['mobile']
+        user.gender = request.form['gender']
+        user.country = request.form['country']
+        user.state = request.form['state']
+        user.username = request.form['username']
+        
+
+        pincode=request.form['transaction_pin']
+
+        if pincode:
+            user.transaction_pin = request.form['transaction_pin']
+        
+        db.session.commit()
+        flash("User updated successfully.", "success")
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        flash(f"Update failed: {str(e)}", "danger")
+
+    return redirect(url_for("user_profile"))
+
+
+
+
+
+
+
 # Handle user update
 @app.route("/update_user/<string:user_id>", methods=["POST"])
 def update_user(user_id):
@@ -573,7 +614,8 @@ def delete_user(user_id):
 
 @app.route("/user_dashboard")
 def user_dashboard():
-    email = request.args.get('email', '').strip()
+    email=session.get("email")
+    
     if not email:
         return "Email parameter missing", 400
 
@@ -635,25 +677,45 @@ def user_dashboard():
 
 @app.route('/investments')
 def investments():
+    email=session.get("email")
+    print(email)
     plans = Investment_Plans.query.all()
     return render_template('investments.html', plans=plans)
 
-@app.route('/submit_investment/<int:plan_id>', methods=['GET', 'POST'])
-def submit_investment(plan_id):
-    plan = Investment_Plans.query.get_or_404(plan_id)
-    form = InvestmentForm(plan_id=plan_id)  # Pre-fill plan_id
+
+@app.route('/submit_investment', methods=['GET', 'POST'])
+def submit_investment():
+    plan_id = request.args.get('plan_id')
+    user_id = request.args.get('user_id')
+
+    if not plan_id or not user_id:
+        flash("Plan ID and User ID are required.", "danger")
+        return redirect(url_for('plans'))  # Adjust to your landing page
+
+    form = InvestmentForm()
+    form.plan_id.data = plan_id
+
+    # Fetch the plan
+    plan = Investment_Plans.query.filter_by(plan_id=plan_id).first()
+    if not plan:
+        flash("Invalid plan selected.", "danger")
+        return redirect(url_for('plans'))
 
     if form.validate_on_submit():
-        # Assuming you have a current_user system in place (like Flask-Login)
-        user_id = 1  # Replace with current_user.id
-
         amount = form.amount_invested.data
+
+        # Validate amount range
+        if amount < plan.min_amount or amount > plan.max_amount:
+            flash(f"Amount must be between ${plan.min_amount} and ${plan.max_amount}.", "danger")
+            return render_template('submit_investment.html', form=form, plan=plan)
+
+        # Proceed with investment
         start_date = datetime.utcnow()
         end_date = start_date + timedelta(days=plan.period_in_days)
 
         new_investment = User_Investments(
             user_id=user_id,
-            plan_id=plan.id,
+            plan_id=plan.plan_id,  # or plan.id depending on your model
             amount_invested=amount,
             profit_earned=0.0,
             start_date=start_date,
@@ -661,12 +723,21 @@ def submit_investment(plan_id):
             is_active=True,
             created_at=start_date
         )
+
         db.session.add(new_investment)
         db.session.commit()
-        flash('Investment submitted successfully!', 'success')
+
+        flash("Investment made successfully!", "success")
         return redirect(url_for('investments'))
 
     return render_template('submit_investment.html', form=form, plan=plan)
+
+
+#with this we can easily use {{ email }} in jinja, but for routes it will still be session.get(email)
+@app.context_processor
+def inject_email():
+    return dict(email=session.get('email'))
+
 
 
 if __name__=='__main__':

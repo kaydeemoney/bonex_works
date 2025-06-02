@@ -25,17 +25,22 @@
 
 
         
-        <a href="{{ url_for('user_dashboard', email=email) }}" style="text-decoration: none; color: inherit;">
+        <a href="{{ url_for('user_dashboard', email=session['email']) }}" style="text-decoration: none; color: inherit;">
           <li class="nav-item active">
             <i class="fa-solid fa-table-cells"></i>
             <span>Dashboard</span>
           </li>
         </a>
-        
+
+
+        <a href="{{ url_for('investments', email=session['email']) }}" style="text-decoration: none; color: inherit;">        
         <li class="nav-item">
           <i class="fa-solid fa-list-check"></i>
           <span>Investment Plans</span>
         </li>
+        </a>
+
+
         <li class="nav-item">
           <i class="fa-solid fa-dollar-sign"></i>
           <span>Deposit</span>
@@ -52,26 +57,41 @@
           <i class="fa-solid fa-clock-rotate-left"></i>
           <span>Transaction History</span>
         </li>
+
+        <a href="{{ url_for('user_profile', email=session['email']) }}" style="text-decoration: none; color: inherit;">
         <li class="nav-item">
           <i class="fa-solid fa-user"></i>
           <span>My Profile</span>
         </li>
+        </a>
+
+
+
       </ul>
       <div class="logout">
         <i class="fa-solid fa-right-from-bracket"></i>
         <span>Logout</span>
       </div>
     </div>
-
     <main class="main-content">
 
-
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flashes">
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+    
       {% block content %}
-
+    
       {% endblock content %}
-
-
+    
     </main>
+    
   </div>
 
   <script src="script.js"></script>

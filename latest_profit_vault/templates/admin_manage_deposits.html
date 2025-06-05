@@ -9,7 +9,7 @@
     <table class="referral-table">
       <thead>
         <tr>
-          <th>User ID</th>
+          <th>User Email</th>
           <th>Amount Deposited</th>
           <th>Sender Wallet Address</th>
           <th>Wallet Network</th>
@@ -21,35 +21,37 @@
         </tr>
       </thead>
       <tbody>
-        {% for deposit in deposits %}
-        <tr>
-          <form method="POST">
-            <td>{{ deposit.user_id }}</td>
-            <td>${{ "%.2f"|format(deposit.amount_deposited) }}</td>
-            <td>{{ deposit.senders_wallet_address }}</td>
-            <td>{{ deposit.senders_wallet_network }}</td>
-            <td>{{ deposit.estimated_time_of_sending }}</td>
-            <td>{{ deposit.comment }}</td>
+        {% for item in deposit_data %}
+        <form method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="user_id" value="{{ item.deposit.user_id }}">
+          <tr>
+            <td>{{ item.email }}</td>
+            <td>${{ "%.2f"|format(item.deposit.amount_deposited) }}</td>
+            <td>{{ item.deposit.senders_wallet_address }}</td>
+            <td>{{ item.deposit.senders_wallet_network }}</td>
+            <td>{{ item.deposit.estimated_time_of_sending }}</td>
+            <td>{{ item.deposit.comment }}</td>
             <td>
-              {% if deposit.status == 0 %}
+              {% if item.deposit.status == 0 %}
                 Pending
-              {% elif deposit.status == 1 %}
+              {% elif item.deposit.status == 1 %}
                 Rejected
-              {% elif deposit.status == 2 %}
+              {% elif item.deposit.status == 2 %}
                 Confirmed
               {% endif %}
             </td>
             <td>
-              <input type="hidden" name="user_id" value="{{ deposit.user_id }}">
               <button type="submit" name="action" value="confirm" class="btn-confirm">Confirm</button>
             </td>
             <td>
               <button type="submit" name="action" value="reject" class="btn-reject">Reject</button>
             </td>
-          </form>
-        </tr>
+          </tr>
+        </form>
         {% endfor %}
       </tbody>
+      
     </table>
   </div>
 </div>

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<section class="transaction-history">
+  <h2>Transaction History</h2>
+
+  <div class="filters">
+    <h3>Filters</h3>
+    <div class="filter-controls">
+      <div>
+        <label for="transactionType">Transaction Type</label>
+        <select id="transactionType">
+          <option selected>Select an option</option>
+        </select>
+      </div>
+      <div>
+        <label for="dateRange">Date Range</label>
+        <select id="dateRange">
+          <option selected>Select an option</option>
+        </select>
+      </div>
+      <button class="reset-btn">Reset Filters</button>
+      <button class="export-btn"><i class="fa-solid fa-download"></i> Export</button>
+    </div>
+  </div>
+
+  <div class="transactions-section">
+    <div class="transactions-header">
+      <h3>Transactions</h3>
+      <input type="text" placeholder="Search transactions..." class="search-input" />
+    </div>
+
+    <div class="transaction-table">
+      <div class="table-header">
+        <span>Type</span>
+        <span>Amount</span>
+        <span>Status</span>
+        <span>Date</span>
+        <span>Description</span>
+      </div>
+
+      {% for tx in transaction_log %}
+      <div class="table-row">
+        <span>
+          {% if tx.type.lower() == 'referral' %}
+            <i class="fa-solid fa-user-group text-orange-500"></i> Referral
+          {% elif tx.type.lower() == 'withdrawal' %}
+            <i class="fa-solid fa-arrow-up text-red-500"></i> Withdrawal
+          {% elif tx.type.lower() == 'investment' %}
+            <i class="fa-solid fa-line-chart text-blue-500"></i> Investment
+          {% elif tx.type.lower() == 'deposit' %}
+            <i class="fa-solid fa-circle-down text-green-500"></i> Deposit
+          {% else %}
+            <i class="fa-solid fa-money-bill-wave text-gray-500"></i> {{ tx.type }}
+          {% endif %}
+        </span>
+
+        <span class="{% if tx.type.lower() in ['deposit', 'referral'] %}positive{% elif tx.type.lower() == 'withdrawal' %}negative{% endif %}">
+          {{ "+$" if tx.type.lower() in ['deposit', 'referral'] else "-$" if tx.type.lower() == 'withdrawal' else "$" }}{{ "%.2f"|format(tx.amount) }}
+        </span>
+
+        <span class="status {{ tx.status|lower }}">{{ tx.status }}</span>
+        <span>{{ tx.created_at.strftime('%b %d, %Y, %I:%M %p') }}</span>
+        <span>{{ tx.description or "N/A" }}</span>
+      </div>
+      {% else %}
+      <div class="table-row">
+        <span colspan="5">No transactions found.</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+{% endblock content %}

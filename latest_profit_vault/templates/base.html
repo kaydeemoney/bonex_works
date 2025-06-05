@@ -40,23 +40,34 @@
         </li>
         </a>
 
+        <a href="{{ url_for('deposit', email=session['email']) }}" style="text-decoration: none; color: inherit;">
+          <li class="nav-item">
+            <i class="fa-solid fa-user"></i>
+            <span>Deposit</span>
+          </li>
+          </a>
 
-        <li class="nav-item">
-          <i class="fa-solid fa-dollar-sign"></i>
-          <span>Deposit</span>
-        </li>
+
         <li class="nav-item">
           <i class="fa-solid fa-right-left"></i>
           <span>Withdraw</span>
         </li>
-        <li class="nav-item">
-          <i class="fa-solid fa-user-group"></i>
-          <span>Referral Program</span>
-        </li>
-        <li class="nav-item">
-          <i class="fa-solid fa-clock-rotate-left"></i>
-          <span>Transaction History</span>
-        </li>
+
+
+        <a href="{{ url_for('user_referral_page', email=session['email']) }}" style="text-decoration: none; color: inherit;">
+          <li class="nav-item">
+            <i class="fa-solid fa-user"></i>
+            <span>Referral Program</span>
+          </li>
+          </a>
+
+
+        <a href="{{ url_for('transaction_history', email=session['email']) }}" style="text-decoration: none; color: inherit;">
+          <li class="nav-item">
+            <i class="fa-solid fa-user"></i>
+            <span>Transaction History</span>
+          </li>
+          </a>
 
         <a href="{{ url_for('user_profile', email=session['email']) }}" style="text-decoration: none; color: inherit;">
         <li class="nav-item">

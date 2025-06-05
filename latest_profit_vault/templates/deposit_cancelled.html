@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="info-message">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  <h2>⚠️ Deposit Cancelled</h2>
+  <p>You have cancelled your deposit request.</p>
+  <br/><br/><br/><br/>
+  <a href="{{ url_for('user_dashboard') }}" class="btn">Return to Dashboard</a>
+</div>
+{% endblock %}

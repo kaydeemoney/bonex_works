@@ -1514,6 +1514,21 @@ body, html {
   color: #856404;
 }
 
+.flash.success {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.flash.info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
 
 .form-errors {
   background-color: #f8d7da;
@@ -1962,4 +1977,84 @@ textarea {
 .plan-detail-card .separator {
   margin: 0 8px;
   color: #9ca3af;
+}
+
+.confirm-deposit-card {
+  background-color: white;
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-family: 'Inter', sans-serif;
+}
+
+.confirm-deposit-card h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.confirm-deposit-card .intro-text {
+  font-size: 15px;
+  color: #4b5563;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.deposit-details p {
+  font-size: 15px;
+  color: #1f2937;
+  margin-bottom: 10px;
+}
+
+.deposit-details strong {
+  font-weight: 600;
+  color: #1d3db8;
+}
+
+.confirm-deposit-card .note-text {
+  font-size: 14px;
+  color: #374151;
+  margin: 25px 0;
+  line-height: 1.6;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.confirm-btn {
+  background-color: #1d3db8;
+  color: white;
+}
+
+.confirm-btn:hover {
+  background-color: #15339f;
+}
+
+.reject-btn {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+}
+
+.reject-btn:hover {
+  background-color: #e5e7eb;
 }

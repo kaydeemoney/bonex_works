@@ -1,0 +1,82 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+<div class="card investment-form-card">
+  <h2>Edit Crypto Wallet</h2>
+  <p class="subtext">Update wallet balances, activity, and metadata</p>
+
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group">
+      {{ form.user_id.label }}
+      {{ form.user_id(class="form-control", placeholder="Enter User ID") }}
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        {{ form.total_balance_usd.label }}
+        {{ form.total_balance_usd(class="form-control", placeholder="e.g. 1200.50") }}
+      </div>
+      <div class="form-group">
+        {{ form.total_earnings_usd.label }}
+        {{ form.total_earnings_usd(class="form-control", placeholder="e.g. 300.75") }}
+      </div>
+      <div class="form-group">
+        {{ form.total_invested_usd.label }}
+        {{ form.total_invested_usd(class="form-control", placeholder="e.g. 1000.00") }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        {{ form.referral_earnings_usd.label }}
+        {{ form.referral_earnings_usd(class="form-control", placeholder="e.g. 50.00") }}
+      </div>
+      <div class="form-group">
+        {{ form.withdrawable_balance.label }}
+        {{ form.withdrawable_balance(class="form-control", placeholder="e.g. 150.00") }}
+      </div>
+      <div class="form-group">
+        {{ form.roi_percentage.label }}
+        {{ form.roi_percentage(class="form-control", placeholder="e.g. 5.5") }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        {{ form.active_investments_count.label }}
+        {{ form.active_investments_count(class="form-control", placeholder="e.g. 3") }}
+      </div>
+      <div class="form-group">
+        {{ form.account_status.label }}
+        {{ form.account_status(class="form-control", placeholder="e.g. Active, Suspended") }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        {{ form.last_investment_date.label }}
+        {{ form.last_investment_date(class="form-control", placeholder="YYYY-MM-DD HH:MM:SS") }}
+      </div>
+      <div class="form-group">
+        {{ form.last_login_date.label }}
+        {{ form.last_login_date(class="form-control", placeholder="YYYY-MM-DD HH:MM:SS") }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        {{ form.date_joined.label }}
+        {{ form.date_joined(class="form-control", placeholder="YYYY-MM-DD HH:MM:SS") }}
+      </div>
+      <div class="form-group">
+        {{ form.last_updated.label }}
+        {{ form.last_updated(class="form-control", placeholder="YYYY-MM-DD HH:MM:SS") }}
+      </div>
+    </div>
+
+    {{ form.submit(class="btn btn-primary full-width") }}
+  </form>
+</div>
+{% endblock content %}

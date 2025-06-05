@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="confirm-deposit-card">
+  <h2>Deposit Confirmation</h2>
+  <p class="intro-text">
+    To deposit, you confirm that you are making a USDT deposit using these details:
+  </p>
+
+  <div class="deposit-details">
+    <p><strong>Amount you are depositing:</strong> ${{ amount_deposited }}</p>
+    <p><strong>Deposit into this address:</strong> {{ reciever_address }}</p>
+    <p><strong>Your wallet network:</strong> {{ senders_wallet_network }}</p>
+    <p><strong>Crypto Currency:</strong> USDT</p>
+    <p><strong>Time of sending:</strong> {{ estimated_time_of_sending }}</p>
+    <p><strong>Your comment if any:</strong> {{ comment }}</p>
+  </div>
+
+  <p class="note-text">
+    Please click <strong>Confirm</strong> once you are done with the transfer and the admin will review it as soon as possible.<br>
+    Or click <strong>Reject</strong> if you want to cancel the deposit.
+  </p>
+
+  <div class="action-buttons">
+    <form method="POST" action="{{ url_for('user_deposit_confirmation') }}">
+      <!-- Hidden fields to carry over data -->
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      
+      <input type="hidden" name="user_id" value="{{ user_id }}">
+      <input type="hidden" name="amount_deposited" value="{{ amount_deposited }}">
+      <input type="hidden" name="senders_wallet_address" value="{{ senders_wallet_address }}">
+      <input type="hidden" name="senders_wallet_network" value="{{ senders_wallet_network }}">
+      <input type="hidden" name="estimated_time_of_sending" value="{{ estimated_time_of_sending }}">
+      <input type="hidden" name="comment" value="{{ comment }}">
+
+      <button type="submit" name="action" value="confirm" class="btn confirm-btn">
+        <i class="fa-solid fa-circle-check"></i> Confirm
+      </button>
+      <button type="submit" name="action" value="reject" class="btn reject-btn">
+        <i class="fa-solid fa-circle-xmark"></i> Reject
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

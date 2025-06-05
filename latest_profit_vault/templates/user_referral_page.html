@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="header">
+  <h1>Deposit</h1>
+</div>
+
+<div class="referral-container">
+  <h2 class="referral-heading">Partnership Program</h2>
+
+  <div class="referral-cardees">
+    <div class="cardee empty-cardee">
+      <i class="fa-solid fa-user-group fa-2x"></i>
+    </div>
+
+    <div class="cardee earnings-cardee">
+      <div>
+        <h4>Total Earnings</h4>
+        <p class="earnings-amount">${{ total_earnings }}</p>
+        <small>Earn 5% of referrals' withdrawal amounts</small>
+      </div>
+      <i class="fa-solid fa-share-nodes share-icon"></i>
+    </div>
+  </div>
+
+  <div class="invite-section">
+    <h3>Invite Friends & Earn</h3>
+    <div class="invite-note">
+      Earn by inviting your friends to invest and receive 5% of their withdrawal amount as a reward.
+      Grow your earnings effortlessly through our partnership program!
+    </div>
+
+    <label for="referral-link" class="referral-label">Your Referral Link</label>
+    <div class="referral-link-box">
+      <input type="text" id="referral-link" value="{{ referral_link }}" readonly />
+      <button class="copy-btn"><i class="fa-regular fa-copy"></i></button>
+    </div>
+
+    <div class="withdraw-btn-wrapper">
+      <button class="withdraw-btn">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        Share Your Link 
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

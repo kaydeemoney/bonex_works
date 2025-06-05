@@ -24,7 +24,7 @@
 
     <div class="balance-info">
       <h4>Available Balance</h4>
-      <p>${{ '{:,.2f}'.format(wallet.withdrawable_balance) }}</p>
+      <p>${{ '{:,.2f}'.format(wallet.withdrawable_balance or 0.0) }}</p>
       <div class="buttons">
         <button class="deposit">Deposit</button>
         <button class="withdraw">Withdraw</button>
@@ -40,7 +40,8 @@
       <span>Total Balance</span>
       <div class="icon-box"><i class="fa-solid fa-wallet"></i></div>
     </div>
-    <div class="card-amount">${{ '{:,.2f}'.format(wallet.total_balance_usd) }}</div>
+    <div class="card-amount">${{ '{:,.2f}'.format(wallet.total_balance_usd or 0.0) }}</div>
+
     <div class="card-change positive">+12% <span>vs last month</span></div>
   </div>
 
@@ -49,7 +50,8 @@
       <span>Total Earnings</span>
       <div class="icon-box"><i class="fa-solid fa-dollar-sign"></i></div>
     </div>
-    <div class="card-amount">${{ '{:,.2f}'.format(wallet.total_earnings_usd) }}</div>
+    <div class="card-amount">${{ '{:,.2f}'.format(wallet.total_earnings_usd or 0.0) }}</div>
+
     <div class="card-change positive">+8% <span>vs last month</span></div>
   </div>
 
@@ -58,7 +60,7 @@
       <span>Total Invested</span>
       <div class="icon-box"><i class="fa-solid fa-chart-line"></i></div>
     </div>
-    <div class="card-amount">${{ '{:,.2f}'.format(wallet.total_invested_usd) }}</div>
+    <div class="card-amount">${{ '{:,.2f}'.format(wallet.total_invested_usd or 0.0) }}</div>
     <div class="card-change positive">+5% <span>vs last month</span></div>
   </div>
 </div>
@@ -81,11 +83,11 @@
       <div class="card-info">
         <div class="info-group">
           <label>Invested Amount</label>
-          <div class="info-value">${{ '{:,.2f}'.format(inv.amount_invested) }}</div>
+          <div class="info-value">${{ '{:,.2f}'.format(inv.amount_invested or 0.0) }}</div>
         </div>
         <div class="info-group">
           <label>Expected Profit</label>
-          <div class="info-value profit">${{ '{:,.2f}'.format(inv.profit_earned) }}</div>
+          <div class="info-value profit">${{ '{:,.2f}'.format(inv.profit_earned or 0.0) }}</div>
         </div>
         <div class="info-group">
           <label>ROI</label>

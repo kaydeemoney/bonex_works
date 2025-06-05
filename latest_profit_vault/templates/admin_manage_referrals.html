@@ -1,56 +1,51 @@
 {% extends "admin_base.html" %}
-
 {% block content %}
+
 <div class="card referral-table-card">
   <h2>Referral Rewards Management</h2>
   <p class="subtext">Confirm and reward referrals made by users</p>
 
   <div class="responsive-table-wrapper">
     {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="flash-container">
-      {% for category, message in messages %}
-        <div class="flash-message {{ category }}">
-          {{ message }}
+      {% if messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+            <div class="flash-message {{ category }}">{{ message }}</div>
+          {% endfor %}
         </div>
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}
+      {% endif %}
+    {% endwith %}
 
     <table class="referral-table">
       <thead>
         <tr>
-          <th>Referee ID</th>
-          
-
-          <th>Time of Creation</th>
+          <th>Referred User Email</th>
+          <th>Referred By (Email)</th>
+          <th>Time of Registration</th>
           <th>Reward Amount ($)</th>
           <th>Confirm</th>
         </tr>
       </thead>
       <tbody>
-        {% for user in referees %}
-        <tr>
-          <td>{{ user.registration_referral_id }}</td>
-          <td>{{ user.created_at }}</td>
-          <td>
-        <form method="POST">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-         
-              <input type="text" name="reward_amount" class="reward-input" placeholder="e.g. 2000.00" required />
-              <input type="hidden" name="referee_id" value="{{ user.user_id }}" />
+        {% for row in referees %}
+          <tr>
+            <td>{{ row.referee.email }}</td>
+            <td>{{ row.referrer_email }}</td>
+            <td>{{ row.referee.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td>
+              <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="text" name="reward_amount" class="reward-input" placeholder="e.g. 2000.00" required />
+                <input type="hidden" name="referee_id" value="{{ row.referee.user_id }}" />
             </td>
             <td>
-              <button type="submit" class="btn-confirm">Confirm</button>
+                <button type="submit" class="btn-confirm">Confirm</button>
+              </form>
             </td>
-          </form>
-        </tr>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
 {% endblock content %}
-
-

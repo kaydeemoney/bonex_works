@@ -2,7 +2,7 @@ from flask import Flask, Blueprint, render_template, request, redirect, url_for,
 from flask_wtf import FlaskForm
 from PIL import Image
 from flask_sqlalchemy import SQLAlchemy
-from wtforms import StringField, PasswordField, SubmitField, BooleanField,HiddenField, SelectField, DateField, TextAreaField, RadioField, FloatField, IntegerField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField,HiddenField, SelectField, DecimalField, DateField,DateTimeField, TextAreaField, RadioField, FloatField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional, NumberRange
 import uuid, json
 from config import Config
@@ -45,16 +45,9 @@ def allowed_file(filename):
 class AdminWalletAddress(db.Model):
     __tablename__ = 'admin_wallet_addresses'
 
-    id = db.Column(db.Integer, primary_key=True)
-    erc20_address = db.Column(db.String(255))
-    trc20_address = db.Column(db.String(255))
-    sol_address = db.Column(db.String(255))
-    bep20_address = db.Column(db.String(255))
-    polygon_pos_address = db.Column(db.String(255))
-    ton_address = db.Column(db.String(255))
-    arbitrum_one_address = db.Column(db.String(255))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    network = db.Column(db.String(50), nullable=False, unique=True)
+    address = db.Column(db.String(255), nullable=False)
 
 class User(db.Model):
     __tablename__ = 'user'
@@ -117,10 +110,11 @@ class Withdrawal(db.Model):
 class Transaction(db.Model):
     __tablename__ = 'transaction'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer,  nullable=False)
-    reference_id = db.Column(db.Integer,  nullable=False)
-    transaction_type = db.Column(db.String(50), nullable=False)  # deposit, withdrawal, etc.
+    user_id = db.Column(db.String(100), nullable=False)
+    type = db.Column(db.String(20), nullable=False)
     amount = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(30), nullable=False)
+    description = db.Column(db.String(50), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 class CryptoWallet(db.Model):
     __tablename__ = 'crypto_wallet'
@@ -147,9 +141,11 @@ class Deposit(db.Model):
     amount_deposited = db.Column(db.Numeric(10, 2), nullable=False)
     senders_wallet_address = db.Column(db.String(255), nullable=False)
     senders_wallet_network = db.Column(db.String(100), nullable=False)
-    estimated_time_of_sending = db.Column(db.DateTime, nullable=False)
+    estimated_time_of_sending = db.Column(db.String(255), nullable=False)
     comment = db.Column(db.String(255))
     status = db.Column(db.Integer, default=0)  # 0 = pending, 1 = rejected, 2 = confirmed
+
+
 
 class SignupForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
@@ -205,24 +201,48 @@ class InvestmentPlanForm(FlaskForm):
 
 
 
-
 class AdminWalletAddressForm(FlaskForm):
-    erc20_address = StringField('ERC20 Address', validators=[Optional()])
-    trc20_address = StringField('TRC20 Address', validators=[Optional()])
-    sol_address = StringField('Solana Address', validators=[Optional()])
-    bep20_address = StringField('BEP20 Address', validators=[Optional()])
-    polygon_pos_address = StringField('Polygon POS Address', validators=[Optional()])
-    ton_address = StringField('TON Address', validators=[Optional()])
-    arbitrum_one_address = StringField('Arbitrum One Address', validators=[Optional()])
-    submit = SubmitField('Save Wallet Addresses')
-
-
+    submit = SubmitField("Save")
 
 class InvestmentForm(FlaskForm):
     plan_id = HiddenField('Plan ID', validators=[DataRequired()])
     amount_invested = FloatField('Amount to Invest', validators=[DataRequired(), NumberRange(min=1)])
     submit = SubmitField('Submit Investment')
 
+
+class DepositForm(FlaskForm):
+    amount_deposited = DecimalField('Enter Amount', validators=[DataRequired()])
+    senders_wallet_network = SelectField('Select USDT Network', validators=[DataRequired()],
+        choices=[
+            ('ERC20', 'ERC20'),
+            ('TRC20', 'TRC20'),
+            ('SOL', 'SOL'),
+            ('BEP20', 'BEP20'),
+            ('Polygon_POS', 'Polygon_POS'),
+            ('TON', 'TON'),
+            ('Arbitrum_One', 'Arbitrum_One'),
+        ])
+    senders_wallet_address = StringField('Sender Wallet Address', validators=[DataRequired()])
+    estimated_time_of_sending = StringField('Estimated Sending Time', validators=[DataRequired()])
+    comment = TextAreaField('Comment (Optional)')
+
+
+class CryptoWalletForm(FlaskForm):
+    user_id = StringField("User ID", validators=[Optional(), Length(max=100)])
+    total_balance_usd = FloatField("Total Balance (USD)", validators=[Optional()])
+    total_earnings_usd = FloatField("Total Earnings (USD)", validators=[Optional()])
+    total_invested_usd = FloatField("Total Invested (USD)", validators=[Optional()])
+    referral_earnings_usd = FloatField("Referral Earnings (USD)", validators=[Optional()])
+    active_investments_count = IntegerField("Active Investments Count", validators=[Optional()])
+    last_investment_date = DateTimeField("Last Investment Date", validators=[Optional()], format='%Y-%m-%d %H:%M:%S')
+    roi_percentage = FloatField("ROI Percentage", validators=[Optional()])
+    withdrawable_balance = FloatField("Withdrawable Balance", validators=[Optional()])
+    last_login_date = DateTimeField("Last Login Date", validators=[Optional()], format='%Y-%m-%d %H:%M:%S')
+    account_status = StringField("Account Status", validators=[Optional(), Length(max=20)])
+    date_joined = DateTimeField("Date Joined", validators=[Optional()], format='%Y-%m-%d %H:%M:%S')
+    last_updated = DateTimeField("Last Updated", validators=[Optional()], format='%Y-%m-%d %H:%M:%S')
+
+    submit = SubmitField("Submit")
 
 #these are the routes for pages pertaining to the landing page    
 @app.route("/")
@@ -248,8 +268,10 @@ def admin_investment_plan():
         annual_roi=form.annual_roi.data
         comment=form.comment.data
 
+        plan_id= str(uuid.uuid4())
+
         investment=Investment_Plans(name=name, min_amount=min_amount,max_amount=max_amount, period_in_days=period_in_days,monthly_roi=monthly_roi,
-                                    annual_roi=annual_roi, comment=comment)
+                                    annual_roi=annual_roi, comment=comment, plan_id=plan_id)
         try:
             db.session.add(investment)
             db.session.commit()
@@ -373,6 +395,79 @@ def signup():
 
 
 
+
+@app.route("/deposit", methods=['GET', 'POST'])
+def deposit():
+    form = DepositForm()
+    email=session.get('email')
+    user=User.query.filter_by(email=email).first()
+    user_id=user.user_id
+    print(user_id)
+    if form.validate_on_submit():  
+        print("validated on submit")
+        flash('Requesting Deposit Information.', 'success')
+        return redirect(url_for('user_deposit_confirmation', user_id=user_id, amount_deposited=form.amount_deposited.data,
+                                senders_wallet_address=form.senders_wallet_address.data, 
+                                senders_wallet_network=form.senders_wallet_network.data, estimated_time_of_sending=
+                                form.estimated_time_of_sending.data, comment=form.comment.data, status=0))
+    else:
+        print(form.errors)
+    return render_template('deposit.html', form=form)
+
+
+@app.route("/user_deposit_confirmation", methods=['GET', 'POST'])
+def user_deposit_confirmation():
+    if request.method == 'POST':
+        if request.form['action'] == 'confirm':
+            deposit = Deposit(
+                user_id=request.form['user_id'],
+                amount_deposited=request.form['amount_deposited'],
+                senders_wallet_address=request.form['senders_wallet_address'],
+                senders_wallet_network=request.form['senders_wallet_network'],
+                estimated_time_of_sending=request.form['estimated_time_of_sending'],
+                comment=request.form.get('comment', ''),
+                status=0
+            )
+
+            transaction_copy= Transaction(user_id=request.form['user_id'],
+                                          type="Deposit", amount=request.form['amount_deposited'],
+                                          status="Pending",
+                                          description=request.form.get('comment', ''))
+            
+            db.session.add(deposit)
+            db.session.add(transaction_copy)
+            db.session.commit()
+            flash("✅ Deposit successfully confirmed and submitted. Awaiting admin review.", "success")
+            return redirect(url_for('deposit_success'))
+
+        elif request.form['action'] == 'reject':
+            flash("❌ Deposit request was cancelled.", "info")
+            return redirect(url_for('deposit_cancelled'))
+
+    # GET request
+    user_id = request.args.get('user_id')
+    amount_deposited = request.args.get('amount_deposited')
+    senders_wallet_address = request.args.get('senders_wallet_address')
+    senders_wallet_network = request.args.get('senders_wallet_network')
+    estimated_time_of_sending = request.args.get('estimated_time_of_sending')
+    comment = request.args.get('comment')
+    status = request.args.get('status')
+
+
+
+    reciever_address = AdminWalletAddress.query.filter_by(network=senders_wallet_network).first().address
+
+    return render_template('user_deposit_confirmation.html',
+                           user_id=user_id,
+                           amount_deposited=amount_deposited,
+                           senders_wallet_address=senders_wallet_address,
+                           senders_wallet_network=senders_wallet_network,
+                           estimated_time_of_sending=estimated_time_of_sending,
+                           comment=comment,
+                           status=status,
+                           reciever_address=reciever_address)
+
+
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -398,6 +493,8 @@ def login():
 def login_to_invest():
     form = LoginForm()  # Use the WTForm here
     plan_id = request.args.get('plan_id')
+
+    print(plan_id)
     if form.validate_on_submit():
         print("validated")
         email = form.email.data
@@ -424,69 +521,76 @@ def login_to_invest():
 
 
 
-
-
 @app.route("/admin_manage_referrals", methods=['GET', 'POST'])
 def admin_manage_referrals():
     if request.method == 'POST':
-        user_id = request.form.get('referee_id')
-
-        current_user=User.query.filter_by(user_id=user_id).first()
-        refree_id=current_user.registration_referral_id
-
+        user_id = request.form.get('referee_id')  # This is the referree
         try:
             reward = Decimal(request.form.get('reward_amount', '0.00'))
         except InvalidOperation:
             flash("Invalid reward amount", 'danger')
             return redirect(url_for('admin_manage_referrals'))
 
+        referee = User.query.filter_by(user_id=user_id).first()
 
-        wallet = CryptoWallet.query.filter_by(user_id=refree_id).first()
+        if not referee or not referee.registration_referral_id:
+            flash("Referee not found or has no referral", 'danger')
+            return redirect(url_for('admin_manage_referrals'))
 
+        referrer = User.query.filter_by(user_id=referee.registration_referral_id).first()
+        if not referrer:
+            flash("Referrer not found", 'danger')
+            return redirect(url_for('admin_manage_referrals'))
+
+        wallet = CryptoWallet.query.filter_by(user_id=referrer.user_id).first()
         if wallet:
-            wallet.total_balance_usd += reward
-            wallet.total_earnings_usd += reward
-            wallet.referral_earnings_usd += reward
-            wallet.withdrawable_balance += reward
+            reward_float = float(reward)
+            wallet.total_balance_usd = (wallet.total_balance_usd or 0) + reward_float
+            wallet.total_earnings_usd = (wallet.total_earnings_usd or 0) + reward_float
+            wallet.referral_earnings_usd = (wallet.referral_earnings_usd or 0) + reward_float
+            wallet.withdrawable_balance = (wallet.withdrawable_balance or 0) + reward_float
             wallet.last_updated = datetime.utcnow()
-            user_id.registration_referral_id=None
+
+            referee.registration_referral_id = None  # Mark referral as processed
             db.session.commit()
-            flash(f"Reward of ${reward} confirmed for user {user_id}, refered by {refree_id} ", 'success')
-
-            
-
-
+            flash(f"Reward of ${reward} confirmed for {referrer.email}, referred by {referee.email}", 'success')
+   
+        
+        
         else:
-            flash(f"Wallet not found for user {user_id}", 'danger')
+            flash(f"Wallet not found for referrer {referrer.email}", 'danger')
 
         return redirect(url_for('admin_manage_referrals'))
 
-    # GET: show all users with a valid referral
+    # GET: show all referees with valid referrer
     referees = User.query.filter(User.registration_referral_id.isnot(None)).all()
-    return render_template('admin_manage_referrals.html', referees=referees)
 
+    # attach referrer email for template display
+    data = []
+    for user in referees:
+        referrer = User.query.filter_by(user_id=user.registration_referral_id).first()
+        data.append({
+            'referee': user,
+            'referrer_email': referrer.email if referrer else 'Unknown'
+        })
+
+    return render_template('admin_manage_referrals.html', referees=data)
 
 @app.route("/admin_wallet_addresses", methods=["GET", "POST"])
 def admin_wallet_addresses():
-    existing = AdminWalletAddress.query.first()
-    form = AdminWalletAddressForm(obj=existing)
+    form = AdminWalletAddressForm()
+    records = AdminWalletAddress.query.order_by(AdminWalletAddress.network).all()
 
-    if form.validate_on_submit():
-        if existing:
-            form.populate_obj(existing)
-            flash("Wallet addresses updated successfully.", "success")
-        else:
-            new_entry = AdminWalletAddress()
-            form.populate_obj(new_entry)
-            db.session.add(new_entry)
-            flash("Wallet addresses saved successfully.", "success")
-
+    if request.method == "POST":
+        for record in records:
+            new_address = request.form.get(record.network)
+            if new_address and new_address != record.address:
+                record.address = new_address
         db.session.commit()
+        flash("Wallet addresses updated successfully.", "success")
         return redirect(url_for("admin_wallet_addresses"))
 
-    return render_template("admin_wallet_addresses.html", form=form)
-
-
+    return render_template("admin_wallet_addresses.html", form=form, records=records)
 
 @app.route("/admin_manage_deposits", methods=["GET", "POST"])
 def admin_manage_deposits():
@@ -495,23 +599,47 @@ def admin_manage_deposits():
         action = request.form.get("action")
 
         deposit = Deposit.query.filter_by(user_id=user_id, status=0).first()
+        wallet = CryptoWallet.query.filter_by(user_id=user_id).first()
+        transaction = Transaction.query.filter_by(user_id=user_id, type="deposit", status="pending").first()
 
         if deposit:
             if action == "confirm":
-                deposit.status = 2
-                flash(f"Deposit by {user_id} confirmed.", "success")
+                if wallet:
+                    wallet.total_balance_usd = (wallet.total_balance_usd or 0) + float(deposit.amount_deposited)
+                    wallet.withdrawable_balance = (wallet.withdrawable_balance or 0) + float(deposit.amount_deposited)
+
+                if transaction:
+                    transaction.status = "completed"
+
+                db.session.delete(deposit)
+                db.session.commit()
+
+                flash(f"Deposit by {user_id} confirmed and wallet updated.", "success")
+
             elif action == "reject":
-                deposit.status = 1
-                flash(f"Deposit by {user_id} rejected.", "danger")
-            db.session.commit()
+                if transaction:
+                    transaction.status = "rejected"
+
+                db.session.delete(deposit)
+                db.session.commit()
+
+                flash(f"Deposit by {user_id} rejected and removed.", "danger")
+
+            return redirect(url_for("admin_manage_deposits"))
         else:
-            flash(f"No pending deposit found for user {user_id}.", "warning")
+            flash("No matching pending deposit found.", "warning")
+            return redirect(url_for("admin_manage_deposits"))
 
-        return redirect(url_for("admin_manage_deposits"))
+    # For display: combine deposit and email in one structure
+    pending_deposits = Deposit.query.filter_by(status=0).all()
+    deposit_data = []
 
-    deposits = Deposit.query.filter_by(status=0).all()
-    return render_template("admin_manage_deposits.html", deposits=deposits)
+    for deposit in pending_deposits:
+        user = User.query.filter_by(user_id=deposit.user_id).first()
+        email = user.email if user else "Unknown"
+        deposit_data.append({"deposit": deposit, "email": email})
 
+    return render_template("admin_manage_deposits.html", deposit_data=deposit_data)
 
 @app.route("/admin_users_list")
 def admin_users_list():
@@ -522,8 +650,16 @@ def admin_users_list():
 @app.route("/edit_user/<string:user_id>", methods=["GET"])
 def edit_user(user_id):
     user = User.query.filter_by(user_id=user_id).first_or_404()
-    return render_template("edit_user.html", user=user)
+    bank=CryptoWallet.query.filter_by(user_id=user_id).first_or_404()
+    return render_template("edit_user.html", user=user, bank=bank)
 
+
+@app.route("/transaction_history")
+def transaction_history():
+    email=session.get('email')
+    user_id=User.query.filter_by(email=email).first().user_id
+    transaction_log=Transaction.query.filter_by(user_id=user_id).all()
+    return render_template("transaction_history.html", transaction_log=transaction_log)
 
 
 
@@ -688,6 +824,12 @@ def submit_investment():
     plan_id = request.args.get('plan_id')
     user_id = request.args.get('user_id')
 
+    print(plan_id)
+    print(user_id)
+
+    balance= CryptoWallet.query.filter_by(user_id=user_id).first().withdrawable_balance
+    balance=float(balance)
+
     if not plan_id or not user_id:
         flash("Plan ID and User ID are required.", "danger")
         return redirect(url_for('plans'))  # Adjust to your landing page
@@ -707,6 +849,9 @@ def submit_investment():
         # Validate amount range
         if amount < plan.min_amount or amount > plan.max_amount:
             flash(f"Amount must be between ${plan.min_amount} and ${plan.max_amount}.", "danger")
+            return render_template('submit_investment.html', form=form, plan=plan)
+        elif amount>balance:
+            flash(f"Amount must be within your balance range, please deposit more.", "danger")
             return render_template('submit_investment.html', form=form, plan=plan)
 
         # Proceed with investment
@@ -738,8 +883,79 @@ def submit_investment():
 def inject_email():
     return dict(email=session.get('email'))
 
+@app.route("/deposit_success")
+def deposit_success():
+    return render_template("deposit_success.html")
+
+@app.route("/deposit_cancelled")
+def deposit_cancelled():
+    return render_template("deposit_cancelled.html")
 
 
+
+@app.route("/user_referral_page")
+def user_referral_page():
+    email=session.get('email')
+    user_id=User.query.filter_by(email=email).first().user_id
+    total_earnings=CryptoWallet.query.filter_by(user_id=user_id).first().referral_earnings_usd
+    referral_link=user_id
+    return render_template("user_referral_page.html", user_id=user_id, total_earnings=total_earnings, referral_link=referral_link)
+
+
+@app.route("/edit_crypto_wallet", methods=['GET', 'POST'])
+def edit_crypto_wallet():
+    form = CryptoWalletForm()
+
+    user_id = request.args.get('user_id') or form.user_id.data
+
+    if not user_id:
+        flash("User ID is required to edit a wallet.", "danger")
+        return render_template("edit_crypto_wallet.html", form=form)
+
+    wallet = CryptoWallet.query.filter_by(user_id=user_id).first()
+
+    if not wallet:
+        flash("No wallet found for the provided User ID.", "danger")
+        return render_template("edit_crypto_wallet.html", form=form)
+
+    if request.method == 'GET':
+        # Pre-fill form with existing data
+        form.user_id.data = wallet.user_id
+        form.total_balance_usd.data = wallet.total_balance_usd
+        form.total_earnings_usd.data = wallet.total_earnings_usd
+        form.total_invested_usd.data = wallet.total_invested_usd
+        form.referral_earnings_usd.data = wallet.referral_earnings_usd
+        form.active_investments_count.data = wallet.active_investments_count
+        form.last_investment_date.data = wallet.last_investment_date
+        form.roi_percentage.data = wallet.roi_percentage
+        form.withdrawable_balance.data = wallet.withdrawable_balance
+        form.last_login_date.data = wallet.last_login_date
+        form.account_status.data = wallet.account_status
+        form.date_joined.data = wallet.date_joined
+        form.last_updated.data = wallet.last_updated
+
+    elif form.validate_on_submit():
+        # Update wallet fields from form
+        wallet.total_balance_usd = form.total_balance_usd.data
+        wallet.total_earnings_usd = form.total_earnings_usd.data
+        wallet.total_invested_usd = form.total_invested_usd.data
+        wallet.referral_earnings_usd = form.referral_earnings_usd.data
+        wallet.active_investments_count = form.active_investments_count.data
+        wallet.last_investment_date = form.last_investment_date.data
+        wallet.roi_percentage = form.roi_percentage.data
+        wallet.withdrawable_balance = form.withdrawable_balance.data
+        wallet.last_login_date = form.last_login_date.data
+        wallet.account_status = form.account_status.data
+        wallet.date_joined = form.date_joined.data
+        wallet.last_updated = form.last_updated.data or datetime.utcnow()
+
+        db.session.commit()
+        flash("Wallet updated successfully.", "success")
+        return redirect(url_for('edit_crypto_wallet', user_id=user_id))
+
+    return render_template("edit_crypto_wallet.html", form=form)
+
+    
 if __name__=='__main__':
 	app.run(debug=True)
 

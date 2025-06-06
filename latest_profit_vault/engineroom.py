@@ -141,7 +141,7 @@ class Deposit(db.Model):
     amount_deposited = db.Column(db.Numeric(10, 2), nullable=False)
     senders_wallet_address = db.Column(db.String(255), nullable=False)
     senders_wallet_network = db.Column(db.String(100), nullable=False)
-    estimated_time_of_sending = db.Column(db.String(255), nullable=False)
+    estimated_time_of_sending = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     comment = db.Column(db.String(255))
     status = db.Column(db.Integer, default=0)  # 0 = pending, 1 = rejected, 2 = confirmed
 
@@ -223,7 +223,6 @@ class DepositForm(FlaskForm):
             ('Arbitrum_One', 'Arbitrum_One'),
         ])
     senders_wallet_address = StringField('Sender Wallet Address', validators=[DataRequired()])
-    estimated_time_of_sending = StringField('Estimated Sending Time', validators=[DataRequired()])
     comment = TextAreaField('Comment (Optional)')
 
 
@@ -408,8 +407,7 @@ def deposit():
         flash('Requesting Deposit Information.', 'success')
         return redirect(url_for('user_deposit_confirmation', user_id=user_id, amount_deposited=form.amount_deposited.data,
                                 senders_wallet_address=form.senders_wallet_address.data, 
-                                senders_wallet_network=form.senders_wallet_network.data, estimated_time_of_sending=
-                                form.estimated_time_of_sending.data, comment=form.comment.data, status=0))
+                                senders_wallet_network=form.senders_wallet_network.data, comment=form.comment.data, status=0))
     else:
         print(form.errors)
     return render_template('deposit.html', form=form)
@@ -486,41 +484,6 @@ def login():
     return render_template('login.html', form=form)
 
 
-
-
-
-@app.route("/login_to_invest", methods=['GET', 'POST'])
-def login_to_invest():
-    form = LoginForm()  # Use the WTForm here
-    plan_id = request.args.get('plan_id')
-
-    print(plan_id)
-    if form.validate_on_submit():
-        print("validated")
-        email = form.email.data
-        password = form.password.data
-        got_user_email = User.query.filter_by(email=email).first()
-        
-        if got_user_email:
-            print("email valid")
-            user_id=got_user_email.user_id
-            full_details = got_user_email
-            if full_details.password_hash == password:  # For now, direct compare (should hash in production)
-                print("going to dashboard")
-                return redirect(url_for('submit_investment', user_id=user_id, plan_id=plan_id))
-            else:
-                flash("Invalid user credentials", "danger")
-                return render_template('login.html', form=form)
-        else:
-            flash("Email not found", "danger")
-            print("email not found ")
-            return render_template('login.html', form=form)
-
-    return render_template('login.html', form=form)
-
-
-
-
 @app.route("/admin_manage_referrals", methods=['GET', 'POST'])
 def admin_manage_referrals():
     if request.method == 'POST':
@@ -554,7 +517,16 @@ def admin_manage_referrals():
             referee.registration_referral_id = None  # Mark referral as processed
             db.session.commit()
             flash(f"Reward of ${reward} confirmed for {referrer.email}, referred by {referee.email}", 'success')
-   
+
+
+            transaction_copy= Transaction(user_id=referrer.user_id,
+                                          type="Referral", amount=reward_float,
+                                          status="Complete",
+                                          description=f"referred by {referee.email}")
+            
+            db.session.add(transaction_copy)
+            db.session.commit()
+           
         
         
         else:
@@ -723,6 +695,7 @@ def update_user(user_id):
         user.transaction_pin = request.form['transaction_pin']
         user.registration_referral_id = request.form['registration_referral_id']
         user.is_admin = request.form.get('is_admin')
+        user.password_hash = request.form.get('password_hash')
         
         db.session.commit()
         flash("User updated successfully.", "success")
@@ -814,30 +787,39 @@ def user_dashboard():
 @app.route('/investments')
 def investments():
     email=session.get("email")
+
+    user_id=User.query.filter_by(email=email).first().user_id
+    print(user_id)
     print(email)
     plans = Investment_Plans.query.all()
-    return render_template('investments.html', plans=plans)
-
-
+    return render_template('investments.html', plans=plans, user_id=user_id)
 @app.route('/submit_investment', methods=['GET', 'POST'])
 def submit_investment():
+    email = session.get("email")
+    if not email:
+        return "Email parameter missing", 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return "User not found", 404
+
+    user_id = user.user_id  # Keep this from session!
+    wallet = CryptoWallet.query.filter_by(user_id=user_id).first()
+    if not wallet:
+        return "Wallet not found", 404
+
     plan_id = request.args.get('plan_id')
-    user_id = request.args.get('user_id')
+    user_id_arg = request.args.get('user_id')  # Avoid overwriting session user_id
 
-    print(plan_id)
-    print(user_id)
-
-    balance= CryptoWallet.query.filter_by(user_id=user_id).first().withdrawable_balance
-    balance=float(balance)
-
-    if not plan_id or not user_id:
+    if not plan_id or not user_id_arg:
         flash("Plan ID and User ID are required.", "danger")
-        return redirect(url_for('plans'))  # Adjust to your landing page
+        return redirect(url_for('plans'))
+
+    balance = float(wallet.withdrawable_balance or 0.0)
 
     form = InvestmentForm()
     form.plan_id.data = plan_id
 
-    # Fetch the plan
     plan = Investment_Plans.query.filter_by(plan_id=plan_id).first()
     if not plan:
         flash("Invalid plan selected.", "danger")
@@ -846,21 +828,20 @@ def submit_investment():
     if form.validate_on_submit():
         amount = form.amount_invested.data
 
-        # Validate amount range
         if amount < plan.min_amount or amount > plan.max_amount:
             flash(f"Amount must be between ${plan.min_amount} and ${plan.max_amount}.", "danger")
-            return render_template('submit_investment.html', form=form, plan=plan)
-        elif amount>balance:
-            flash(f"Amount must be within your balance range, please deposit more.", "danger")
-            return render_template('submit_investment.html', form=form, plan=plan)
+            return render_template('submit_investment.html', form=form, plan=plan, wallet=wallet, user=user)
+        elif amount > balance:
+            flash("Amount exceeds your available balance.", "danger")
+            return render_template('submit_investment.html', form=form, plan=plan, wallet=wallet, user=user)
 
-        # Proceed with investment
+        # Process investment
         start_date = datetime.utcnow()
         end_date = start_date + timedelta(days=plan.period_in_days)
 
         new_investment = User_Investments(
             user_id=user_id,
-            plan_id=plan.plan_id,  # or plan.id depending on your model
+            plan_id=plan.plan_id,
             amount_invested=amount,
             profit_earned=0.0,
             start_date=start_date,
@@ -870,13 +851,19 @@ def submit_investment():
         )
 
         db.session.add(new_investment)
+
+        wallet.total_balance_usd = float(wallet.total_balance_usd or 0.0) - amount
+        wallet.total_invested_usd = float(wallet.total_invested_usd or 0.0) + amount
+        wallet.active_investments_count = float(wallet.active_investments_count or 0.0) + 1
+        wallet.last_investment_date = datetime.utcnow()
+        wallet.withdrawable_balance = float(wallet.withdrawable_balance or 0.0) - amount
+
         db.session.commit()
 
         flash("Investment made successfully!", "success")
         return redirect(url_for('investments'))
 
-    return render_template('submit_investment.html', form=form, plan=plan)
-
+    return render_template('submit_investment.html', form=form, plan=plan, wallet=wallet, user=user)
 
 #with this we can easily use {{ email }} in jinja, but for routes it will still be session.get(email)
 @app.context_processor

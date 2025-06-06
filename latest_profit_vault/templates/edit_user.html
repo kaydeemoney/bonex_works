@@ -31,9 +31,18 @@
     <div class="form-group">
     <input name="username" value="{{ user.username }}" placeholder="Username" class="border p-2 rounded" required>
   </div>
-    <div class="form-group">
-    <input name="transaction_pin" value="{{ user.transaction_pin }}" placeholder="Transaction PIN" class="border p-2 rounded" required>
+    
+  <div class="form-group">
+    <label for="transaction_pin" class="block mb-1 font-medium">Transaction PIN</label>
+    <input id="transaction_pin" name="transaction_pin" value="{{ user.transaction_pin }}" placeholder="Transaction PIN" class="border p-2 rounded" required>
   </div>
+
+  <div class="form-group">
+    <label for="password" class="block mb-1 font-medium">Password</label>
+    <input id="password" name="password_hash" value="{{ user.password_hash }}" placeholder="password" class="border p-2 rounded" required>
+  </div>
+  
+  
     <div class="form-group">
     <input name="registration_referral_id" value="{{ user.registration_referral_id or '' }}" placeholder="Referral ID (optional)" class="border p-2 rounded">
   </div>
@@ -41,8 +50,6 @@
 
     <div class="md:col-span-2">
       <button type="submit" class="outline-btn"><i class="fa-solid fa-lock"></i>Save Changes</button>
-    
-    
     </div>
   </form>
 

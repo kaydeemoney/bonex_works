@@ -11,8 +11,6 @@
   </p>
 </section>
 
-<h1 style="text-align: center;">You will login again to proceed with investments</h1>
-
 <div class="plans">
   {% for plan in plans %}
   <div class="cardi">
@@ -29,8 +27,10 @@
     </div>
     <div class="detailsi"><strong>Minimum Investment</strong> ${{ "{:,.2f}".format(plan.min_amount) }}</div>
     <div class="detailsi"><strong>Maximum Investment</strong> ${{ "{:,.2f}".format(plan.max_amount) }}</div>
+
+
     <div class="description">{{ plan.comment or 'No description provided.' }}</div>
-     <a href="{{ url_for('login_to_invest', plan_id=plan.plan_id) }}">
+     <a href="{{ url_for('submit_investment', user_id=user_id, plan_id=plan.plan_id) }}">
       <button class="btn">Invest Now</button>
     </a>
   </div>

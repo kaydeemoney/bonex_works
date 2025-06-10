@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<div class="header">
+  <h1>Deposits</h1>
+  <div class="user-info">
+    <span class="username">{{ user.first_name }} {{ user.last_name }}</span>
+    <img src="{{ url_for('static', filename='uploads/' + profile_picture) }}" alt="User Avatar" class="avatar" />
+  </div>
+</div>
+
+
 <div class="confirm-deposit-card">
   <h2>Deposit Confirmation</h2>
   <p class="intro-text">

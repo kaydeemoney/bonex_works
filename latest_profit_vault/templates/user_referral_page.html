@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="header">
-  <h1>Deposit</h1>
+  <h1>Referrals</h1>
+  <div class="user-info">
+    <span class="username">{{ user.first_name }} {{ user.last_name }}</span>
+    <img src="{{ url_for('static', filename='uploads/' + profile_picture) }}" alt="User Avatar" class="avatar" />
+  </div>
 </div>
 
 <div class="referral-container">
@@ -43,5 +47,36 @@
     </div>
   </div>
 </div>
+
+
+
+<div class="referral-history-card">
+  <h3>Referral History</h3>
+  <table class="referral-table">
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>DATE</th>
+        <th>EARNINGS</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tx in transaction_log %}
+      <tr>
+        <td>
+          <div class="referral-user">
+            <i class="fa-solid fa-user-group"></i>
+            <span> {{ tx.description }} </span>
+          </div>
+        </td>
+        <td> {{ tx.created_at.strftime('%b %d, %Y, %I:%M %p') }} </td>
+        <td class="earning">$ {{ tx.amount }} </td>
+      </tr>
+      {% endfor %}
+      
+    </tbody>
+  </table>
+</div>
+
 
 {% endblock content %}

@@ -16,6 +16,7 @@ from PIL import Image, ImageDraw
 from decimal import Decimal, InvalidOperation
 import string
 import secrets
+from functools import wraps
 
 
 
@@ -83,6 +84,15 @@ class Investment_Plans(db.Model):
     plan_id = db.Column(db.String(100))
 
     
+class UserAdminMessage(db.Model):
+    __tablename__ = 'user_admin_messages'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(36), nullable=False)
+    sender = db.Column(db.Enum('user', 'admin'), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 
 class User_Investments(db.Model):
     __tablename__ = 'user_investments'
@@ -146,6 +156,10 @@ class Deposit(db.Model):
     status = db.Column(db.Integer, default=0)  # 0 = pending, 1 = rejected, 2 = confirmed
 
 
+
+class ContactAdminForm(FlaskForm):
+    message = TextAreaField('Your Message', validators=[DataRequired()])
+    submit = SubmitField('Send')
 
 class SignupForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
@@ -243,19 +257,58 @@ class CryptoWalletForm(FlaskForm):
 
     submit = SubmitField("Submit")
 
+
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'email' not in session:
+            flash("You must be logged in to view this page", "warning")
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+
+
+def get_profile_picture():
+    email=session.get("email")
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return "User not found", 404
+
+    user_id = user.user_id
+    is_admin = user.is_admin
+    profile_picture = "noname.png"
+     # Profile picture logic
+    uploads_folder = os.path.join(app.static_folder, 'uploads')
+    if os.path.isdir(uploads_folder) and user.profile_picture_id:
+        for file_name in os.listdir(uploads_folder):
+            if file_name.startswith(user.profile_picture_id):
+                profile_picture = file_name
+                break
+    return profile_picture
+
+
 #these are the routes for pages pertaining to the landing page    
 @app.route("/")
 def index():
     return render_template('index.html')
 
 @app.route("/admin_dashboard")
+@login_required
 def admin_dashboard():
     return render_template('admin_dashboard.html')
     
 
 
 @app.route("/admin_investment_plan", methods=['GET', 'POST'])
+@login_required
 def admin_investment_plan():
+    email=session.get("email")
+    
     form = InvestmentPlanForm()
     if form.validate_on_submit():
         print("form is validated")
@@ -278,7 +331,7 @@ def admin_investment_plan():
             return redirect(url_for('admin_investment_plan', form=form))
         except IntegrityError as e:
             db.session.rollback()
-            flash("Investment plan added successfully!", "success")
+            flash("Error: Could not add investment plan. It may already exist or have bad data.", "danger")
     return render_template("admin_investment_plan.html", form=form)
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -396,25 +449,35 @@ def signup():
 
 
 @app.route("/deposit", methods=['GET', 'POST'])
+@login_required
 def deposit():
     form = DepositForm()
     email=session.get('email')
+    profile_picture=session.get("profile_picture")
     user=User.query.filter_by(email=email).first()
+    if not user:
+        flash("Invalid session. Please log in again.", "danger")
+        return redirect(url_for('login'))
     user_id=user.user_id
     print(user_id)
     if form.validate_on_submit():  
         print("validated on submit")
         flash('Requesting Deposit Information.', 'success')
-        return redirect(url_for('user_deposit_confirmation', user_id=user_id, amount_deposited=form.amount_deposited.data,
+        return redirect(url_for('user_deposit_confirmation', user_id=user_id, 
+                                amount_deposited=form.amount_deposited.data,
+                                user=user, profile_picture=profile_picture,
                                 senders_wallet_address=form.senders_wallet_address.data, 
                                 senders_wallet_network=form.senders_wallet_network.data, comment=form.comment.data, status=0))
     else:
         print(form.errors)
-    return render_template('deposit.html', form=form)
+    return render_template('deposit.html', form=form, user=user, profile_picture=profile_picture)
 
 
 @app.route("/user_deposit_confirmation", methods=['GET', 'POST'])
+@login_required
 def user_deposit_confirmation():
+    email=session.get('email')
+    profile_picture=session.get('profile_picture')
     if request.method == 'POST':
         if request.form['action'] == 'confirm':
             deposit = Deposit(
@@ -444,6 +507,7 @@ def user_deposit_confirmation():
 
     # GET request
     user_id = request.args.get('user_id')
+    user=User.query.filter_by(user_id=user_id).first()
     amount_deposited = request.args.get('amount_deposited')
     senders_wallet_address = request.args.get('senders_wallet_address')
     senders_wallet_network = request.args.get('senders_wallet_network')
@@ -453,10 +517,14 @@ def user_deposit_confirmation():
 
 
 
-    reciever_address = AdminWalletAddress.query.filter_by(network=senders_wallet_network).first().address
+    reciever_address_wallet = AdminWalletAddress.query.filter_by(network=senders_wallet_network).first().address
 
+    reciever_address = reciever_address_wallet if reciever_address_wallet else None
+    if not reciever_address:
+        flash("Invalid wallet network selected.", "danger")
+        return redirect(url_for('deposit'))
     return render_template('user_deposit_confirmation.html',
-                           user_id=user_id,
+                           user_id=user_id, user=user, profile_picture=profile_picture,
                            amount_deposited=amount_deposited,
                            senders_wallet_address=senders_wallet_address,
                            senders_wallet_network=senders_wallet_network,
@@ -469,23 +537,35 @@ def user_deposit_confirmation():
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     form = LoginForm()
+
     if form.validate_on_submit():
         email = form.email.data
         password = form.password.data
+
         got_user_email = User.query.filter_by(email=email).first()
+
         if got_user_email:
-            if got_user_email.password_hash == password:
+            if got_user_email.password_hash == password:  # Plain text comparison
                 session['email'] = email  # Store email in session
-                return redirect(url_for('user_dashboard'))
+                profile_picture=get_profile_picture()
+
+                session['profile_picture']=profile_picture
+
+                if got_user_email.is_admin:
+                    return redirect(url_for('admin_dashboard'))
+                else:
+                    return redirect(url_for('user_dashboard'))
             else:
-                flash("Invalid user credentials", "danger")
+                flash("Invalid password", "danger")
         else:
             flash("Email not found", "danger")
+
     return render_template('login.html', form=form)
 
-
 @app.route("/admin_manage_referrals", methods=['GET', 'POST'])
+@login_required
 def admin_manage_referrals():
+    email=session.get('email')
     if request.method == 'POST':
         user_id = request.form.get('referee_id')  # This is the referree
         try:
@@ -549,7 +629,9 @@ def admin_manage_referrals():
     return render_template('admin_manage_referrals.html', referees=data)
 
 @app.route("/admin_wallet_addresses", methods=["GET", "POST"])
+@login_required
 def admin_wallet_addresses():
+    email=session.get('email')
     form = AdminWalletAddressForm()
     records = AdminWalletAddress.query.order_by(AdminWalletAddress.network).all()
 
@@ -565,7 +647,9 @@ def admin_wallet_addresses():
     return render_template("admin_wallet_addresses.html", form=form, records=records)
 
 @app.route("/admin_manage_deposits", methods=["GET", "POST"])
+@login_required
 def admin_manage_deposits():
+    email=session.get('email')
     if request.method == "POST":
         user_id = request.form.get("user_id")
         action = request.form.get("action")
@@ -614,38 +698,48 @@ def admin_manage_deposits():
     return render_template("admin_manage_deposits.html", deposit_data=deposit_data)
 
 @app.route("/admin_users_list")
+@login_required
 def admin_users_list():
+    email=session.get('email')
     users = User.query.all()
     return render_template("users.html", users=users)
 
 # Show edit form
 @app.route("/edit_user/<string:user_id>", methods=["GET"])
+@login_required
 def edit_user(user_id):
+    email=session.get('email')
     user = User.query.filter_by(user_id=user_id).first_or_404()
     bank=CryptoWallet.query.filter_by(user_id=user_id).first_or_404()
     return render_template("edit_user.html", user=user, bank=bank)
 
 
 @app.route("/transaction_history")
+@login_required
 def transaction_history():
     email=session.get('email')
+    profile_picture=session.get('profile_picture')
+    user=User.query.filter_by(email=email).first()
     user_id=User.query.filter_by(email=email).first().user_id
     transaction_log=Transaction.query.filter_by(user_id=user_id).all()
-    return render_template("transaction_history.html", transaction_log=transaction_log)
+    return render_template("transaction_history.html",user=user, profile_picture=profile_picture, transaction_log=transaction_log)
 
 
 
 
 # Show edit form
 @app.route("/user_profile", methods=["GET"])
+@login_required
 def user_profile():
     email=session.get('email')
+    profile_picture=session.get('profile_picture')
     user = User.query.filter_by(email=email).first_or_404()
-    return render_template("user_profile.html", user=user)
+    return render_template("user_profile.html", user=user, profile_picture=profile_picture)
 
 
 # Handle user update
 @app.route("/user_profile_updating", methods=["POST"])
+@login_required
 def user_profile_updating():
     email=session.get('email')
     user = User.query.filter_by(email=email).first_or_404()
@@ -681,7 +775,9 @@ def user_profile_updating():
 
 # Handle user update
 @app.route("/update_user/<string:user_id>", methods=["POST"])
+@login_required
 def update_user(user_id):
+    email=session.get('email')
     user = User.query.filter_by(user_id=user_id).first_or_404()
     try:
         user.first_name = request.form['first_name']
@@ -707,7 +803,9 @@ def update_user(user_id):
 
 # Delete user
 @app.route("/delete_user/<string:user_id>", methods=["POST"])
+@login_required
 def delete_user(user_id):
+    email=session.get('email')
     user = User.query.filter_by(user_id=user_id).first_or_404()
     try:
         db.session.delete(user)
@@ -722,6 +820,7 @@ def delete_user(user_id):
 
 
 @app.route("/user_dashboard")
+@login_required
 def user_dashboard():
     email=session.get("email")
     
@@ -734,16 +833,8 @@ def user_dashboard():
 
     user_id = user.user_id
     is_admin = user.is_admin
-    profile_picture = "noname.png"
-
-    # Profile picture logic
-    uploads_folder = os.path.join(app.static_folder, 'uploads')
-    if os.path.isdir(uploads_folder) and user.profile_picture_id:
-        for file_name in os.listdir(uploads_folder):
-            if file_name.startswith(user.profile_picture_id):
-                profile_picture = file_name
-                break
-
+    
+    profile_picture=get_profile_picture()
     # Admin logic
     if is_admin:
         return render_template("admin_dashboard.html", user=user, profile_picture=profile_picture)
@@ -766,7 +857,7 @@ def user_dashboard():
     # Attach plan details to investments
     for inv in active_investments + completed_investments:
         plan = Investment_Plans.query.filter_by(plan_id=inv.plan_id).first()
-        inv.name = plan.name if plan else "Unknown Plan"
+        inv.name = plan.name if plan else "Delisted Plan"
         inv.monthly_roi = plan.monthly_roi if plan else 0
         inv.annual_roi = plan.annual_roi if plan else 0
         inv.progress_percent = (
@@ -785,17 +876,24 @@ def user_dashboard():
 
 
 @app.route('/investments')
+@login_required
 def investments():
     email=session.get("email")
-
+    profile_picture=session.get("profile_picture")
+    user=User.query.filter_by(email=email).first()
     user_id=User.query.filter_by(email=email).first().user_id
     print(user_id)
     print(email)
     plans = Investment_Plans.query.all()
-    return render_template('investments.html', plans=plans, user_id=user_id)
+    return render_template('investments.html',user=user,profile_picture=profile_picture, plans=plans, user_id=user_id)
+
+
+
 @app.route('/submit_investment', methods=['GET', 'POST'])
+@login_required
 def submit_investment():
     email = session.get("email")
+    profile_picture=session.get('profile_picture')
     if not email:
         return "Email parameter missing", 400
 
@@ -830,10 +928,11 @@ def submit_investment():
 
         if amount < plan.min_amount or amount > plan.max_amount:
             flash(f"Amount must be between ${plan.min_amount} and ${plan.max_amount}.", "danger")
-            return render_template('submit_investment.html', form=form, plan=plan, wallet=wallet, user=user)
+            return render_template('submit_investment.html', form=form, plan=plan, wallet=wallet, user=user, profile_picture=profile_picture)
         elif amount > balance:
             flash("Amount exceeds your available balance.", "danger")
-            return render_template('submit_investment.html', form=form, plan=plan, wallet=wallet, user=user)
+            return render_template('submit_investment.html', profile_picture=profile_picture,
+                                   form=form, plan=plan, wallet=wallet, user=user)
 
         # Process investment
         start_date = datetime.utcnow()
@@ -857,40 +956,79 @@ def submit_investment():
         wallet.active_investments_count = float(wallet.active_investments_count or 0.0) + 1
         wallet.last_investment_date = datetime.utcnow()
         wallet.withdrawable_balance = float(wallet.withdrawable_balance or 0.0) - amount
-
+        
+        transaction_copy= Transaction(user_id=user_id,
+                                          type="Investment", amount=amount,
+                                          status="Completed",
+                                          description="Investments added")
+        db.session.add(transaction_copy)
         db.session.commit()
-
         flash("Investment made successfully!", "success")
         return redirect(url_for('investments'))
 
-    return render_template('submit_investment.html', form=form, plan=plan, wallet=wallet, user=user)
+    return render_template('submit_investment.html', form=form, plan=plan, wallet=wallet, user=user, profile_picture=profile_picture)
 
 #with this we can easily use {{ email }} in jinja, but for routes it will still be session.get(email)
 @app.context_processor
 def inject_email():
     return dict(email=session.get('email'))
 
+
+
+
+@app.route('/admin_manage_investments')
+@login_required
+def admin_manage_investments():
+    email=session.get("email")
+    plans = Investment_Plans.query.all()
+    return render_template('admin_manage_investments.html', plans=plans)
+
+@app.route('/delete_plan')
+@login_required
+def delete_plan():
+    email=session.get("email")
+    plan_id=request.args.get('plan_id')
+    plan_to_delete=Investment_Plans.query.filter_by(plan_id=plan_id).first()
+    db.session.delete(plan_to_delete)
+    db.session.commit()
+    plans = Investment_Plans.query.all()
+    return render_template('admin_manage_investments.html', plans=plans)
+
+
+
+
 @app.route("/deposit_success")
+@login_required
 def deposit_success():
+    email=session.get('email')
     return render_template("deposit_success.html")
 
 @app.route("/deposit_cancelled")
+@login_required
 def deposit_cancelled():
+    email=session.get('email')
     return render_template("deposit_cancelled.html")
 
 
 
 @app.route("/user_referral_page")
+@login_required
 def user_referral_page():
     email=session.get('email')
+    profile_picture=session.get('profile_picture')
+    user=User.query.filter_by(email=email).first()
     user_id=User.query.filter_by(email=email).first().user_id
     total_earnings=CryptoWallet.query.filter_by(user_id=user_id).first().referral_earnings_usd
     referral_link=user_id
-    return render_template("user_referral_page.html", user_id=user_id, total_earnings=total_earnings, referral_link=referral_link)
+    transaction_log=Transaction.query.filter_by(user_id=user_id, type="Referral").all()
+    return render_template("user_referral_page.html", user_id=user_id, user=user,profile_picture=profile_picture, total_earnings=total_earnings, referral_link=referral_link,
+                           transaction_log=transaction_log)
 
 
 @app.route("/edit_crypto_wallet", methods=['GET', 'POST'])
+@login_required
 def edit_crypto_wallet():
+    email=session.get('email')
     form = CryptoWalletForm()
 
     user_id = request.args.get('user_id') or form.user_id.data
@@ -941,6 +1079,13 @@ def edit_crypto_wallet():
         return redirect(url_for('edit_crypto_wallet', user_id=user_id))
 
     return render_template("edit_crypto_wallet.html", form=form)
+
+
+@app.route('/logout')
+def logout():
+    session.pop('email', None)
+    flash("You've been logged out", "success")
+    return redirect(url_for('login'))
 
     
 if __name__=='__main__':

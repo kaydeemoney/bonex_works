@@ -76,14 +76,24 @@
         </li>
         </a>
 
-
-
       </ul>
+
+
       <div class="logout">
+
+        <a href="{{ url_for('logout', email=session['email']) }}" style="text-decoration: none; color: inherit;">
         <i class="fa-solid fa-right-from-bracket"></i>
         <span>Logout</span>
+      </a>
       </div>
+
+
+
+
     </div>
+
+
+
     <main class="main-content">
 
       <!-- Flash Messages -->

@@ -438,13 +438,7 @@ body {
   color: #000;
   margin-right: 10px;
 }
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #fff;
-}
+z
 .nav-menu {
   list-style: none;
   padding: 20px 20px 0 20px;
@@ -1276,11 +1270,17 @@ select {
 }
 
 .avatar {
-  width: 96px;
-  height: 96px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 12px;
+  object-fit:contain;
+}
+
+.profile_avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit:contain;
 }
 
 .outline-btn {

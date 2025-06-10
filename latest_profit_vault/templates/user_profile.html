@@ -3,6 +3,7 @@
 {% block content %}
 
 
+
       <div class="profile-container">
         <div class="left-panel">
           <div class="card">
@@ -54,7 +55,7 @@
 
               <div class="form-group full-width">
                 <label>Change Pin</label>
-                <input type="text" name="transaction_pin"  />
+                <input type="text" name="transaction_pin" placeholder="Enter your new pin and save changes"  />
               </div>
 
 
@@ -73,6 +74,13 @@
             <h3>{{ user.first_name }} {{ user.last_name }}</h3>
             <p>{{ user.email }}</p>
             
+          </div>
+
+          <div class="card center-text">
+            <img src="{{ url_for('static', filename='uploads/' + profile_picture) }}" alt="User Avatar" class="profile_avatar" />
+  
+            <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+            <p>{{ user.email }}</p>
           </div>
           
           </div>

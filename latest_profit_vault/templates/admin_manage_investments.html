@@ -1,0 +1,40 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+<div class="user-list-card">
+  <h2 class="section-title">All Plans</h2>
+  <div class="table-wrapper">
+    <table class="styled-table">
+      <thead>
+       <div style="color:red;">Deleting a plan will cause chaos if users are on it, please only use before 
+       the opening of the site to users
+       </div>
+        <tr>
+          <th>Name</th>
+          <th>Comment</th>
+          <th>Creation Time</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        {% for plan in plans %}
+        <tr>
+          <td>{{ plan.name }}</td>
+          <td>{{ plan.comment[0:20] }}</td>
+          <td>{{ plan.created_at }}</td>
+
+          <td class="action-buttons">
+            <a href="{{ url_for('delete_plan', plan_id=plan.plan_id) }}" class="btn btn-edit">Delete</a>
+             
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+{% endblock content %}

@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<div class="header">
+  <h1>Make Investments</h1>
+  <div class="user-info">
+    <span class="username">{{ user.first_name }} {{ user.last_name }}</span>
+    <img src="{{ url_for('static', filename='uploads/' + profile_picture) }}" alt="User Avatar" class="avatar" />
+  </div>
+</div>
+
 <!-- Dashboard Cards -->
 <div class="dashboard-cards">
   <div class="card">

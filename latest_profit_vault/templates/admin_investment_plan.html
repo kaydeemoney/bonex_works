@@ -3,6 +3,32 @@
 {% block content %}
 
 <div class="card investment-form-card">
+
+      <!-- Flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message {{ category }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Form errors -->
+    {% if form.errors %}
+      <div class="form-errors">
+        <ul>
+          {% for field, errors in form.errors.items() %}
+            {% for error in errors %}
+              <li><strong>{{ field|capitalize }}:</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    
   <h2>Add New Investment Plan</h2>
   <p class="subtext">Define new investment options for users</p>
   <form method="POST">

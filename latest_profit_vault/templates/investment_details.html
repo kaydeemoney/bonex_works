@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="investment-container">
+  <div class="investment-header">
+    <div class="header-left">
+      <span class="label">Investment Plan</span>
+      <h2 class="plan-name">{{ plan_name }}</h2>
+    </div>
+    <div class="header-right">
+      <span class="label">Invested Amount</span>
+      <h2 class="amount">${{ investment_amount }}</h2>
+    </div>
+  </div>
+
+  <div class="investment-summary-card">
+    <h3 class="summary-title">📌 Investment Summary</h3>
+    <div class="summary-row"><span>Plan</span><span>{{ plan_name }}</span></div>
+    <div class="summary-row"><span>Investment ID</span><span>{{ investment_id }}</span></div>
+    <div class="summary-row"><span>Invested Amount</span><span>${{ investment_amount }}</span></div>
+    <div class="summary-row"><span>ROI</span><span>{{ roi }}%</span></div>
+    <div class="summary-row"><span>Expected Profit</span><span class="profit">${{ expected_profit }}</span></div>
+    <div class="summary-row"><span>Total Return</span><span>${{ total_return }}</span></div>
+    <div class="summary-row"><span>Start Date</span><span> {{ start_date }}</span></div>
+    <div class="summary-row"><span>Unlock Date</span><span> {{ end_date }}</span></div>
+  </div>
+</div>
+
+
+
+{% endblock %}

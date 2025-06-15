@@ -105,7 +105,9 @@
         </div>
         <span class="progress-percent">{{ inv.progress_percent }}%</span>
       </div>
+       <a href="{{ url_for('investment_details', user_id=user_id, plan_id=plan.plan_id, unique_id=inv.unique_id) }}">
       <button class="details-btn">View Details</button>
+      </a>
     </div>
     {% endfor %}
   </div>
@@ -173,7 +175,10 @@
           <div class="info-value">{{ inv.end_date.strftime('%d/%m/%Y') }}</div>
         </div>
       </div>
+      <a href="{{ url_for('investment_details', user_id=user_id, plan_id=plan.plan_id, unique_id=inv.unique_id) }}">
       <button class="details-btn">View Details</button>
+      </a>
+
     </div>
     {% endfor %}
   </div>

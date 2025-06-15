@@ -1409,15 +1409,16 @@ body, html {
   justify-content: center;
   align-items: center;
   height: 200vh;
-  background: linear-gradient(to right, #1E3A8A, #0D1A47);
+  background: linear-gradient(to right, #FFFFFF, #9e9999);
 }
 
 .auth-bg2 {
+  padding-top: 10%th-bg;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(to right, #1E3A8A, #0D1A47);
+  background: linear-gradient(to right, #FFFFFF, #9e9999);
 }
 
 .auth-card {
@@ -2063,4 +2064,121 @@ textarea {
 
 .reject-btn:hover {
   background-color: #e5e7eb;
+}
+
+
+.investment-container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.investment-header {
+  background: linear-gradient(90deg, #1d3db8, #3b82f6);
+  color: white;
+  padding: 20px 30px;
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.investment-header .label {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.investment-header .plan-name,
+.investment-header .amount {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 4px 0 0 0;
+}
+
+.investment-summary-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 24px 30px;
+  margin-top: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.summary-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #111827;
+  display: flex;
+  align-items: center;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #e5e7eb;
+  padding: 12px 0;
+  font-size: 15px;
+  color: #374151;
+}
+
+.summary-row:first-of-type {
+  border-top: none;
+}
+
+.profit {
+  color: #10b981; /* Green-500 */
+  font-weight: 600;
+}
+
+/* Button Styling */
+.tbtn {
+  display: inline-block;
+  padding: 6px 14px;
+  margin: 4px 4px 0 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+  color: #fff;
+  cursor: pointer;
+}
+
+.tbtn.small {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* Button Colors */
+.tbtn.edit {
+  background-color: #1e40af;
+}
+.tbtn.edit:hover {
+  background-color: #1a34a1;
+}
+
+.tbtn.wallet {
+  background-color: #2563eb;
+}
+.tbtn.wallet:hover {
+  background-color: #1d4ed8;
+}
+
+.tbtn.delete {
+  background-color: #ef4444;
+}
+.tbtn.delete:hover {
+  background-color: #dc2626;
+}
+
+/* Layout Helper */
+.action-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.inline-form {
+  display: inline;
 }

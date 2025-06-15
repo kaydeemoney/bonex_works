@@ -105,6 +105,7 @@ class User_Investments(db.Model):
     end_date = db.Column(db.DateTime, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    unique_id = db.Column(db.Integer, nullable=False)
 
 class Withdrawal(db.Model):
     __tablename__ = 'withdrawal'
@@ -295,12 +296,39 @@ def get_profile_picture():
 #these are the routes for pages pertaining to the landing page    
 @app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template('landing.html')
+   
+
+@app.route("/about")
+def about():
+    return render_template('about.html')
+   
+
+
+@app.route("/contact")
+def contact():
+    return render_template('contact.html')
+   
+
 
 @app.route("/admin_dashboard")
 @login_required
 def admin_dashboard():
-    return render_template('admin_dashboard.html')
+    user_count=User.query.count()
+    print("total_no of users", user_count)
+
+    deposit=0
+
+    all_wallet=CryptoWallet.query.all()
+
+    for person in all_wallet:
+        deposit=deposit+float(person.total_balance_usd or 0)
+    print("ypur deposit now is", deposit)
+
+    pending_request=len(Transaction.query.filter_by(status="pending").all())
+    print("number of pending request", pending_request)
+
+    return render_template('admin_dashboard.html', user_count=user_count, deposit=deposit, pending_request=pending_request)
     
 
 
@@ -613,9 +641,11 @@ def admin_manage_referrals():
             flash(f"Wallet not found for referrer {referrer.email}", 'danger')
 
         return redirect(url_for('admin_manage_referrals'))
+    
+
 
     # GET: show all referees with valid referrer
-    referees = User.query.filter(User.registration_referral_id.isnot(None)).all()
+    referees = User.query.filter(User.registration_referral_id.isnot(None), User.registration_referral_id!="").all()
 
     # attach referrer email for template display
     data = []
@@ -819,6 +849,40 @@ def delete_user(user_id):
 
 
 
+# Show edit form
+@app.route("/edit_plan/<string:plan_id>", methods=["GET"])
+@login_required
+def edit_plan(plan_id):
+    email=session.get('email')
+    plan = Investment_Plans.query.filter_by(plan_id=plan_id).first_or_404()
+    
+    return render_template("edit_plan.html", plan=plan)
+
+
+# Handle user update
+@app.route("/update_plan/<string:plan_id>", methods=["POST"])
+@login_required
+def update_plan(plan_id):
+    email=session.get('email')
+    plan = Investment_Plans.query.filter_by(plan_id=plan_id).first_or_404()
+    try:
+        plan.name = request.form['name']
+        plan.min_amount = request.form['min_amount']
+        plan.max_amount = request.form['max_amount']
+        plan.period_in_days = request.form['period_in_days']
+        plan.monthly_roi = request.form['monthly_roi']
+        plan.annual_roi = request.form['annual_roi']
+        plan.comment = request.form['comment']
+        
+        db.session.commit()
+        flash("Plan updated successfully.", "success")
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        flash(f"Update failed: {str(e)}", "danger")
+
+    return redirect(url_for("admin_manage_investments"))
+
+
 @app.route("/user_dashboard")
 @login_required
 def user_dashboard():
@@ -867,7 +931,7 @@ def user_dashboard():
         inv.end_date_str = inv.end_date.strftime('%d/%m/%Y') if inv.end_date else 'N/A'
 
     return render_template("user_dashboard.html",
-                           user=user,
+                           user=user,plan=plan,
                            profile_picture=profile_picture,
                            wallet=wallet,
                            active_investments=active_investments,
@@ -902,6 +966,7 @@ def submit_investment():
         return "User not found", 404
 
     user_id = user.user_id  # Keep this from session!
+    unique_investment_id= str(uuid.uuid4())
     wallet = CryptoWallet.query.filter_by(user_id=user_id).first()
     if not wallet:
         return "Wallet not found", 404
@@ -946,7 +1011,8 @@ def submit_investment():
             start_date=start_date,
             end_date=end_date,
             is_active=True,
-            created_at=start_date
+            created_at=start_date,
+            unique_id=unique_investment_id
         )
 
         db.session.add(new_investment)
@@ -1079,6 +1145,39 @@ def edit_crypto_wallet():
         return redirect(url_for('edit_crypto_wallet', user_id=user_id))
 
     return render_template("edit_crypto_wallet.html", form=form)
+
+
+
+
+@app.route("/investment_details", methods=["GET", "POST"])
+@login_required
+def investment_details():
+    email=session.get('email')
+    user_id=User.query.filter_by(email=email).first().user_id
+    plan_id=request.args.get('plan_id')
+    unique_id=request.args.get('unique_id')
+
+    print("user id is", user_id)
+    print("plan id is", plan_id)
+    print("unique id is", unique_id)
+
+    user_investment_details= User_Investments.query.filter_by(user_id=user_id, plan_id=plan_id, unique_id=unique_id).first_or_404()
+    other_details=Investment_Plans.query.filter_by(plan_id=plan_id).first()
+
+    plan_name=other_details.name
+    investment_id=plan_id
+    investment_amount=user_investment_details.amount_invested
+    roi=other_details.monthly_roi
+    expected_profit=float(investment_amount*float(roi))/100 
+    total_return=investment_amount+expected_profit
+    start_date=user_investment_details.start_date
+    end_date=user_investment_details.end_date
+
+    return render_template("investment_details.html", plan_name=plan_name,
+    investment_id=investment_id, investment_amount=investment_amount, roi=roi, expected_profit=expected_profit,
+    total_return=total_return, start_date=start_date, end_date=end_date)
+
+
 
 
 @app.route('/logout')

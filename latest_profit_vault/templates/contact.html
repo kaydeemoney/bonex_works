@@ -1,0 +1,81 @@
+{% extends "landing_base.html" %}
+
+{% block content %}
+
+
+    </div>
+    <div class="container-fluid page-header mb-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container">
+            <h1 class="display-3 mb-4 animated slideInDown">Contact</h1>
+            <nav aria-label="breadcrumb animated slideInDown">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="#">Pages</a></li> {# Consider adding a specific 'pages' route or removing this if not needed #}
+                    <li class="breadcrumb-item active" aria-current="page">Contact</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="row g-5">
+                <div class="col-lg-6 wow fadeIn" data-wow-delay="0.1s">
+                    <p class="d-inline-block border rounded text-primary fw-semi-bold py-1 px-3">Contact</p>
+                    <h1 class="display-5 mb-4">If You Have Any Query, Please Contact Us</h1>
+    
+                </div>
+                <div class="col-lg-6 wow fadeIn" data-wow-delay="0.5s" style="min-height: 450px;">
+                    <div class="position-relative rounded overflow-hidden h-100">
+                        <iframe class="position-relative w-100 h-100"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2432.84687002008!2d-2.2472288842426866!3d53.47953267999863!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x487bb1e07b5a5b51%3A0x679d4a8e27c0f1e8!2s353%20Laurel%20St%2C%20Manchester%20M4%206AY%2C%20UK!5e0!3m2!1sen!2sng!4v1678912345678!5m2!1sen!2sng"
+                        frameborder="0" style="min-height: 450px; border:0;" allowfullscreen="" aria-hidden="false"
+                        tabindex="0"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid bg-dark text-light footer mt-5 py-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container py-5">
+            <div class="row g-5">
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Our Office</h4>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>353 Laurel, Manchester, UK</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+1 404 520-2271</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>profitvault05@gmail.com</p>
+                    <div class="d-flex pt-2">
+                        <a class="btn btn-square btn-outline-light rounded-circle me-2" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-square btn-outline-light rounded-circle me-2" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-square btn-outline-light rounded-circle me-2" href=""><i class="fab fa-youtube"></i></a>
+                        <a class="btn btn-square btn-outline-light rounded-circle me-2" href=""><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Investment Plans</h4>
+                    {# These links are placeholders as plan-specific routes weren't provided. You might loop through actual plans from your database. #}
+                    <a class="btn btn-link" href="{{ url_for('index') }}">Starter Plan</a> {# Example, link to index or an investment plans page #}
+                    <a class="btn btn-link" href="{{ url_for('index') }}">Pro Plan</a>
+                    <a class="btn btn-link" href="{{ url_for('index') }}">Master Plan</a>
+                    <a class="btn btn-link" href="{{ url_for('index') }}">Silver Plan</a>
+                    <a class="btn btn-link" href="{{ url_for('index') }}">Diamond Plan</a>
+                    <a class="btn btn-link" href="{{ url_for('index') }}">Platinum Plan</a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Quick Links</h4>
+                    <a class="btn btn-link" href="{{ url_for('about') }}">About Us</a>
+                    <a class="btn btn-link" href="{{ url_for('contact') }}">Contact Us</a>
+                    <a class="btn btn-link" href="{{ url_for('admin_investment_plan') }}">Investment Plans</a> {# Assuming this route shows plans for users too #}
+                    <a class="btn btn-link" href="{{ url_for('contact') }}">Support</a> {# Linking to contact for support #}
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Newsletter</h4>
+                    <p>Get email updates on our investment news and be a part of a better Financial future</p>
+                    <div class="position-relative w-100">
+                        <input class="form-control bg-white border-0 w-100 py-3 ps-4 pe-5" type="text" placeholder="Your email">
+                        <button type="button" class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2">SignUp</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+   {% endblock content %}

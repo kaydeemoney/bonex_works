@@ -1,0 +1,38 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+
+<div class="p-4 max-w-3xl mx-auto">
+  <h2 class="text-xl font-bold mb-4">Edit Plan</h2>
+  <form method="POST" class="auth-form" action="{{ url_for('update_plan', plan_id=plan.plan_id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group">
+    <input name="name" value="{{ plan.name }}" placeholder="Plan Name"  required>
+    </div>
+    <div class="form-group">
+    <input name="min_amount" value="{{ plan.min_amount }}" placeholder="Minimum Amount" required>
+    </div>
+    <div class="form-group">
+      <input name="max_amount" value="{{ plan.max_amount }}" placeholder="Maximum Amount"  required>
+    </div>
+    <div class="form-group">
+      <input name="period_in_days" value="{{ plan.period_in_days }}" placeholder="Period In Days"  required>
+    </div>
+    <div class="form-group">
+      <input name="monthly_roi" value="{{ plan.monthly_roi }}" placeholder="Monthly ROI" required>
+    </div>
+    <div class="form-group">
+      <input name="annual_roi" value="{{ plan.annual_roi }}" placeholder="Annual ROI"  required>
+    </div>
+    <div class="form-group">
+      <input name="comment" value="{{ plan.comment }}" placeholder="Comment"  required>
+    </div>
+    <div class="md:col-span-2">
+      <button type="submit" class="outline-btn"><i class="fa-solid fa-lock"></i>Save Changes</button>
+    </div>
+  </form>  
+</div>
+
+
+
+{% endblock content %}

@@ -47,11 +47,12 @@
           </li>
           </a>
 
-
-        <li class="nav-item">
-          <i class="fa-solid fa-right-left"></i>
-          <span>Withdraw</span>
-        </li>
+          <a href="{{ url_for('withdrawal', email=session['email']) }}" style="text-decoration: none; color: inherit;">
+            <li class="nav-item">
+              <i class="fa-solid fa-right-left"></i>
+              <span>Withdraw</span>
+            </li>
+        </a>
 
 
         <a href="{{ url_for('user_referral_page', email=session['email']) }}" style="text-decoration: none; color: inherit;">
@@ -75,6 +76,13 @@
           <span>My Profile</span>
         </li>
         </a>
+
+        <a href="{{ url_for('user_chat', email=session['email']) }}" style="text-decoration: none; color: inherit;">
+          <li class="nav-item">
+            <i class="fa-solid fa-user"></i>
+            <span>Chat Admin</span>
+          </li>
+          </a>
 
       </ul>
 
@@ -115,7 +123,8 @@
     
   </div>
 
-  <script src="script.js"></script>
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
 
 </body>
 </html>

@@ -17,6 +17,8 @@ from decimal import Decimal, InvalidOperation
 import string
 import secrets
 from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 
 
@@ -156,12 +158,21 @@ class Deposit(db.Model):
     comment = db.Column(db.String(255))
     status = db.Column(db.Integer, default=0)  # 0 = pending, 1 = rejected, 2 = confirmed
 
-
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender = db.Column(db.String(50))  # 'admin' or user email/user_id
+    recipient = db.Column(db.String(50))  # 'admin' or user email/user_id
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False)
 
 class ContactAdminForm(FlaskForm):
     message = TextAreaField('Your Message', validators=[DataRequired()])
     submit = SubmitField('Send')
 
+class MessageForm(FlaskForm):
+    content = TextAreaField('Type a message', validators=[DataRequired()])
+    submit = SubmitField('Send')
 class SignupForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
     last_name = StringField('Last Name', validators=[DataRequired()])
@@ -235,10 +246,26 @@ class DepositForm(FlaskForm):
             ('BEP20', 'BEP20'),
             ('Polygon_POS', 'Polygon_POS'),
             ('TON', 'TON'),
-            ('Arbitrum_One', 'Arbitrum_One'),
+            ('Arbitrum', 'Arbitrum'),
         ])
     senders_wallet_address = StringField('Sender Wallet Address', validators=[DataRequired()])
     comment = TextAreaField('Comment (Optional)')
+
+class WithdrawalForm(FlaskForm):
+    amount_to_withdraw = DecimalField('Enter Amount', validators=[DataRequired()])
+    withdrawal_wallet_network = SelectField('Select USDT Network', validators=[DataRequired()],
+        choices=[
+            ('ERC20', 'ERC20'),
+            ('TRC20', 'TRC20'),
+            ('SOL', 'SOL'),
+            ('BEP20', 'BEP20'),
+            ('Polygon_POS', 'Polygon_POS'),
+            ('TON', 'TON'),
+            ('Arbitrum', 'Arbitrum'),
+        ])
+    withdrawal_wallet_address = StringField('Sender Wallet Address', validators=[DataRequired()])
+    comment = TextAreaField('Comment (Optional)')
+
 
 
 class CryptoWalletForm(FlaskForm):
@@ -430,11 +457,14 @@ def signup():
             print("pin dont match")
             flash("Transaction pins do not match!", "danger")
             return render_template('signup.html', form=form)
+        
+        hashed_password = generate_password_hash(password)
+
 
         # Save user to database
         user = User(
             first_name=first_name, last_name=last_name, email=email, mobile=mobile, gender=gender,
-            country=country, state=state, password_hash=password, transaction_pin=transaction_pin,
+            country=country, state=state, password_hash=hashed_password, transaction_pin=transaction_pin,
             username=username, registration_referral_id=registration_referral_id, is_admin=None,
             user_id=user_id, profile_picture_id=user_id, created_at=created_at
         )
@@ -573,7 +603,7 @@ def login():
         got_user_email = User.query.filter_by(email=email).first()
 
         if got_user_email:
-            if got_user_email.password_hash == password:  # Plain text comparison
+            if check_password_hash(got_user_email.password_hash, password): 
                 session['email'] = email  # Store email in session
                 profile_picture=get_profile_picture()
 
@@ -917,7 +947,8 @@ def user_dashboard():
         elapsed = (now - start_date).total_seconds()
         percent = (elapsed / total_duration) * 100 if total_duration > 0 else 100
         return round(min(max(percent, 0), 100), 2)
-
+    
+    plan=None
     # Attach plan details to investments
     for inv in active_investments + completed_investments:
         plan = Investment_Plans.query.filter_by(plan_id=inv.plan_id).first()
@@ -991,6 +1022,8 @@ def submit_investment():
     if form.validate_on_submit():
         amount = form.amount_invested.data
 
+        roi_factor=float(float(plan.monthly_roi)/100)
+
         if amount < plan.min_amount or amount > plan.max_amount:
             flash(f"Amount must be between ${plan.min_amount} and ${plan.max_amount}.", "danger")
             return render_template('submit_investment.html', form=form, plan=plan, wallet=wallet, user=user, profile_picture=profile_picture)
@@ -1007,7 +1040,7 @@ def submit_investment():
             user_id=user_id,
             plan_id=plan.plan_id,
             amount_invested=amount,
-            profit_earned=0.0,
+            profit_earned=float(roi_factor*amount),
             start_date=start_date,
             end_date=end_date,
             is_active=True,
@@ -1176,6 +1209,170 @@ def investment_details():
     return render_template("investment_details.html", plan_name=plan_name,
     investment_id=investment_id, investment_amount=investment_amount, roi=roi, expected_profit=expected_profit,
     total_return=total_return, start_date=start_date, end_date=end_date)
+
+
+
+
+
+
+@app.route("/withdrawal", methods=['GET', 'POST'])
+@login_required
+def withdrawal():
+    form = WithdrawalForm()
+    email=session.get('email')
+    profile_picture=session.get("profile_picture")
+    user=User.query.filter_by(email=email).first()
+    if not user:
+        flash("Invalid session. Please log in again.", "danger")
+        return redirect(url_for('login'))
+    user_id=user.user_id
+    print(user_id)
+    if form.validate_on_submit():
+        user_id=user_id
+        amount_to_withdraw=form.amount_to_withdraw.data
+        withdrawal_wallet_network=form.withdrawal_wallet_network.data 
+        withdrawal_wallet_address=form.withdrawal_wallet_address.data
+        
+        wallet_row=CryptoWallet.query.filter_by(user_id=user_id).first()
+
+        prev_balance=wallet_row.total_balance_usd
+        prev_withdrawable_balance=wallet_row.withdrawable_balance
+
+        new_balance=float(prev_balance-float(amount_to_withdraw))
+        new_withdrawable_balance=float(prev_withdrawable_balance-float(prev_withdrawable_balance))
+
+        commission=0.01*float(amount_to_withdraw)
+
+        amount_going_out=float(amount_to_withdraw)-commission
+
+        comment="withdrawn to address " + withdrawal_wallet_address + " of the USDT network: " + withdrawal_wallet_network
+
+        if new_balance>0:
+            wallet_row.total_balance_usd=new_balance
+            wallet_row.withdrawable_balance=new_withdrawable_balance
+            
+
+            new_withdrawal=Withdrawal(user_id=user_id,
+                                      amount=amount_going_out,
+                                      fee=commission,
+                                      status="completed",
+                                      wallet_address=withdrawal_wallet_address,
+                                      network=withdrawal_wallet_network)
+            transaction_fill=Transaction(user_id=user_id, amount=amount_going_out,
+                                         type="withdrawal",status="completed", description=comment)
+            db.session.add(new_withdrawal)
+            db.session.add(transaction_fill)
+            db.session.commit()
+
+            return render_template("withdrawal_success.html") 
+
+
+
+        else:
+            return render_template("withdrawal_failure.html")
+    else:
+        print(form.errors)
+    return render_template('withdrawal.html', form=form, user=user, profile_picture=profile_picture)
+
+
+
+
+
+@app.route("/admin_manage_withdrawal", methods=["GET", "POST"])
+@login_required
+def admin_manage_withdrawal():
+    email=session.get('email')
+    if request.method == "POST":
+        user_id = request.form.get("user_id")
+        action = request.form.get("action")
+
+        withdrawal = Withdrawal.query.filter_by(user_id=user_id).first()
+        
+        if withdrawal:
+            if action == "confirm":
+                
+                db.session.delete(withdrawal)
+                db.session.commit()
+
+                flash(f"Withdrawal COnfirmed.", "success")
+                """this is the point for notification insertion, we are coming back to this"""
+
+            else:
+                db.session.delete(withdrawal)
+                db.session.commit()
+
+
+            
+            return redirect(url_for("admin_manage_withdrawal"))
+        
+        else:
+            flash("No matching withdrawal found.", "warning")
+            return redirect(url_for("admin_manage_withdrawal"))
+
+    # For display: combine deposit and email in one structure
+    pending_confirmation = Withdrawal.query.all()
+    withdrawal_data = []
+
+    for withdrawals in pending_confirmation:
+        user = User.query.filter_by(user_id=withdrawals.user_id).first()
+        email = user.email if user else "Unknown"
+        withdrawal_data.append({"withdrawal": withdrawals, "email": email})
+
+    return render_template("admin_manage_withdrawal.html", withdrawal_data=withdrawal_data)
+
+
+
+
+@app.route("/user_chat", methods=['GET', 'POST'])
+@login_required
+def user_chat():
+    email=session.get("email")
+    form = MessageForm()
+    messages = Message.query.filter(
+        (Message.sender == email) | (Message.recipient == email) ).order_by(Message.timestamp).all()
+
+    if form.validate_on_submit():
+        msg = Message(sender=email, recipient='admin', content=form.content.data)
+        db.session.add(msg)
+        db.session.commit()
+        return redirect(url_for('user_chat'))
+
+    return render_template('user_chat.html', form=form, messages=messages)
+
+
+
+
+@app.route("/admin_inbox", methods=['GET', 'POST'])
+@login_required
+def admin_inbox():
+    email=session.get("email")
+    users = (
+        db.session.query(Message.sender)
+        .filter(Message.recipient == 'admin')
+        .distinct()
+        .all()
+    )
+    # Flatten list of tuples, ignore 'admin' self-messages
+    user_list = [u[0] for u in users if u[0] != 'admin']
+    return render_template('admin_inbox.html', users=user_list)
+
+
+@app.route("/admin_chat/<user_email>", methods=['GET', 'POST'])
+@login_required
+def admin_chat(user_email):
+    email=session.get("email")
+    form = MessageForm()
+    messages = Message.query.filter(
+        (Message.sender == user_email) | (Message.recipient == user_email)
+    ).order_by(Message.timestamp).all()
+
+    if form.validate_on_submit():
+        msg = Message(sender='admin', recipient=user_email, content=form.content.data)
+        db.session.add(msg)
+        db.session.commit()
+        return redirect(url_for('admin_chat', user_email=user_email))
+
+    return render_template('admin_chat.html', form=form, messages=messages, user_email=user_email)
 
 
 

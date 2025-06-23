@@ -88,6 +88,20 @@
           </li>
         </a>
 
+        <a href="{{ url_for('admin_manage_withdrawal') }}" style="text-decoration: none; color: inherit;">
+          <li class="nav-item active">
+            <i class="fa-solid fa-table-cells"></i>
+            <span>Manage Withdrawal</span>
+          </li>
+        </a>
+
+        <a href="{{ url_for('admin_inbox') }}" style="text-decoration: none; color: inherit;">
+          <li class="nav-item active">
+            <i class="fa-solid fa-table-cells"></i>
+            <span>Inbox</span>
+          </li>
+        </a>
+
       </ul>
 
 
@@ -118,7 +132,9 @@
     </main>
   </div>
 
-  <script src="script.js"></script>
+ 
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
 
 </body>
 

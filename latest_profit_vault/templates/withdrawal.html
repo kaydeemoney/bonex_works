@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<!-- Header -->
+<div class="header">
+  <h1>Withdrawal</h1>
+  <div class="user-info">
+    <span class="username">{{ user.first_name }} {{ user.last_name }}</span>
+    <img src="{{ url_for('static', filename='uploads/' + profile_picture) }}" alt="User Avatar" class="avatar" />
+  </div>
+
+</div>
+
+
+<p>Please note that withdrawal will be processed and sent within 24 hours of initiation</p>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    <div class="deposit-card">
+      <h3>USDT Withdrawal</h3>
+
+      <div class="form-group">
+        <label for="amount">Enter Amount</label>
+        {{ form.amount_to_withdraw(class="form-control", id="amount", placeholder="Enter withdrawal amount") }}
+      </div>
+
+      <div class="form-group">
+        <label for="network">Select USDT Network</label>
+        {{ form.withdrawal_wallet_network(class="form-control", id="network") }}
+      </div>
+
+      <div class="form-group">
+        <label for="wallet_address">Sender Wallet Address</label>
+        {{ form.withdrawal_wallet_address(class="form-control", id="wallet_address", placeholder="Your wallet address") }}
+      </div>
+
+      <div class="form-group">
+        <label for="comment">Comment (optional) -- try to put the time you are making the transfer</label>
+        {{ form.comment(class="form-control", id="comment", placeholder="Additional notes") }}
+      </div>
+
+      <button class="deposit-btn" type="submit">
+        <i class="fa-solid fa-dollar-sign"></i> Withdraw
+      </button>
+    </div>
+  </form>
+
+
+
+  {% endblock content %}
+

@@ -29,22 +29,23 @@
       <tbody>
         {% for row in referees %}
           <tr>
-            <td>{{ row.referee.email }}</td>
-            <td>{{ row.referrer_email }}</td>
-            <td>{{ row.referee.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
-            <td>
+            <td data-label="Referred User Email">{{ row.referee.email }}</td>
+            <td data-label="Referred By (Email)">{{ row.referrer_email }}</td>
+            <td data-label="Time of Registration">{{ row.referee.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td data-label="Reward Amount ($)">
               <form method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="text" name="reward_amount" class="reward-input" placeholder="e.g. 2000.00" required />
                 <input type="hidden" name="referee_id" value="{{ row.referee.user_id }}" />
             </td>
-            <td>
+            <td data-label="Confirm">
                 <button type="submit" class="btn-confirm">Confirm</button>
               </form>
             </td>
           </tr>
         {% endfor %}
       </tbody>
+      
     </table>
   </div>
 </div>

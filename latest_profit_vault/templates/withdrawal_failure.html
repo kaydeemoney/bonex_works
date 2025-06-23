@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="error-message">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  <h2>🎉 Failed!</h2>
+  <p>Your withdrawal amount is more than your balance</p>
+
+  <br/><br/><br/><br/>
+  <a href="{{ url_for('user_dashboard') }}" class="btn-delete">Return to Dashboard</a>
+</div>
+{% endblock %}

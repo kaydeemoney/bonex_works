@@ -1,0 +1,17 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<div class="chat-card">
+  <h2 class="section-title">Inbox</h2>
+  <ul class="user-list">
+    {% for user in users %}
+      <li>
+        <a href="{{ url_for('admin_chat', user_email=user) }}" class="inbox-link">
+          <i class="fa-solid fa-user"></i> {{ user }}
+        </a>
+      </li>
+    {% else %}
+      <li>No active chats yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

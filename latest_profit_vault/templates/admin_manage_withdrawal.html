@@ -1,0 +1,46 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+<div class="card deposit-table-card">
+  <h2>Pending Withdrawals Management</h2>
+  <p class="subtext">Confirm withdrawals made by users</p>
+
+  <div class="responsive-table-wrapper">
+    <table class="referral-table">
+      <thead>
+        <tr>
+          <th>User Email</th>
+          <th>Amount Withdrawn</th>
+          <th> Wallet Address</th>
+          <th>Wallet Network</th>
+          <th>Estimated Sending Time</th>
+          <th>Confirm</th>
+          <th>Reject</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in withdrawal_data %}
+        <form method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="user_id" value="{{ item.withdrawal.user_id }}">
+          <tr>
+            <td>{{ item.email }}</td>
+            <td>${{ "%.2f"|format(item.withdrawal.amount) }}</td>
+            <td>{{ item.withdrawal.wallet_address }}</td>
+            <td>{{ item.withdrawal.network }}</td>
+            <td>{{ item.withdrawal.created_at }}</td>
+            <td>
+              <button type="submit" name="action" value="confirm" class="btn-confirm">Confirm</button>
+            </td>
+            <td>
+              <button type="submit" name="action" value="reject" class="btn-reject">Reject</button>
+            </td>
+          </tr>
+        </form>
+        {% endfor %}
+      </tbody>
+      
+    </table>
+  </div>
+</div>
+{% endblock %}
